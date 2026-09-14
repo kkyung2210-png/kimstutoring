@@ -1,7 +1,14 @@
 "use strict";
+const { URL } = require('node:url');
 
 const PHONE_PATTERN = /^01[016789]-?[0-9]{3,4}-?[0-9]{4}$/;
-const ALLOWED_ORIGIN = /^https:\/\/(?:www\.)?kimsenglish\.co\.kr$/i;
+const { SITE_URL } = require('../../config/site');
+const brand = require('../../config/brand');
+const siteHost = new URL(SITE_URL).hostname.replace(/^www\./, '');
+const ALLOWED_ORIGIN = { test(value) {
+  try { const url = new URL(value); return url.protocol === 'https:' && [siteHost, 'www.' + siteHost].includes(url.hostname) && !url.port && !url.username && !url.password && url.pathname === '/' && !url.search && !url.hash; }
+  catch { return false; }
+} };
 const PREVIEW_ORIGIN = /^https:\/\/[a-z0-9-]+\.netlify\.app$/i;
 const LOCAL_ORIGIN = /^http:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i;
 
@@ -124,7 +131,7 @@ async function handler(event) {
       body: JSON.stringify({
         from: fromEmail,
         to: [contactEmail],
-        subject: "[Kim's English] 새로운 상담 신청",
+        subject: `[${brand.name}] 새로운 상담 신청`,
         text: mail.text,
         html: mail.html,
       }),

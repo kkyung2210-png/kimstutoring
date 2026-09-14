@@ -561,6 +561,24 @@ p { margin-top: 0; }
 .related-card:hover { border-color: #c5d2e3; box-shadow: var(--shadow-lg); transform: translateY(-4px); }
 .related-card p { color: var(--muted); font-size: .91rem; }
 .related-card .text-link { margin-top: auto; }
+/* Scoped detail navigation: compact lists, no effects on home or hub cards. */
+.tutoring-related h2 { font-size: 1.35rem; }
+.tutoring-related-list, .tutoring-hub-links { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 12px; }
+.tutoring-related-list { grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+.tutoring-related-list li { min-width: 0; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; }
+.tutoring-related a { display: inline-block; padding: 8px 0; text-underline-offset: 4px; overflow-wrap: anywhere; }
+.tutoring-related a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.tutoring-related-list a { font-weight: 650; }
+.tutoring-related-list p { margin: 2px 0 0; color: var(--muted); font-size: .9rem; }
+.tutoring-hub-links { display: flex; flex-wrap: wrap; gap: 4px 24px; padding-top: 12px; border-top: 1px solid var(--border); }
+.tutoring-finder { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: 14px; align-items: end; }
+.tutoring-finder label { display: grid; gap: 8px; min-width: 0; }
+.tutoring-finder input, .tutoring-finder select { width: 100%; min-height: 44px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+.tutoring-region-group { margin: 16px 0; border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.tutoring-region-group > summary { padding: 8px 0; cursor: pointer; font-weight: 650; }
+.tutoring-region-group .hub-page-grid { margin-top: 16px; }
+.home-feature-grid.tutoring-overview-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+[data-finder-more][hidden] { display: none; }
 .internal-link-groups, .hub-navigation-grid { display: grid; gap: 18px; }
 .internal-link-group, .hub-group, .popular-related { padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-large); box-shadow: var(--shadow-sm); }
 .internal-link-group h3, .hub-group h3, .popular-related h3 { margin-bottom: 14px; color: var(--ink); font-size: 1rem; }

@@ -1,6 +1,6 @@
 {
-  "name": "Kim's English",
-  "short_name": "Kim's English",
+  "name": "킴스과외",
+  "short_name": "킴스과외",
   "description": "지역과 학습 목적에 맞는 회화 과외 안내",
   "start_url": "/",
   "display": "standalone",

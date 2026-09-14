@@ -1,4 +1,5 @@
 /** JSON-LD 문자열을 안전하게 만들고 HTML 종료 태그 오해를 막습니다. */
+const brand = require('../config/brand');
 function makeJsonLd(data) {
   return JSON.stringify(data, null, 2).replace(/</g, "\\u003c");
 }
@@ -9,7 +10,7 @@ function makePageSchema({ canonicalUrl, page, locationName, context, baseUrl, fa
     "@context": "https://schema.org",
     "@graph": [
       { "@type": "WebPage", "@id": canonicalUrl, url: canonicalUrl, name: page.title, description: page.description, inLanguage: page.language, dateModified: page.updated_at || undefined },
-      { "@type": "Service", name: page.title, description: page.description, serviceType: `${locationName} ${context.service}`, areaServed: { "@type": "AdministrativeArea", name: locationName }, audience: { "@type": "Audience", audienceType: page.target || "학습자" }, provider: { "@type": "Organization", name: "김선생 회화 과외", url: baseUrl } },
+      { "@type": "Service", name: page.title, description: page.description, serviceType: `${locationName} ${context.service}`, areaServed: { "@type": "AdministrativeArea", name: locationName }, audience: { "@type": "Audience", audienceType: page.target || "학습자" }, provider: { "@type": "Organization", name: brand.name, alternateName: brand.englishName, url: baseUrl } },
       { "@type": "FAQPage", mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) },
       { "@type": "BreadcrumbList", itemListElement: breadcrumbItems },
     ],

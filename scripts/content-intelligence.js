@@ -1,183 +1,83 @@
-const fs = require("fs");
-const path = require("path");
-
-const root = path.resolve(__dirname, "..");
-const contentPath = path.join(root, "config", "content");
-const FILES = ["intro", "lesson", "benefit", "faq", "cta", "examples"];
-const TOPIC_PRIORITY = ["toeic-speaking", "toeic", "opic", "ielts", "toefl", "teps", "jlpt", "jpt", "business", "travel", "japanese", "english", "exam", "conversation"];
-const TARGET_CTA_TITLES = [
-  (v) => `${v.region} ${v.target} ${v.service} 수업, 내 상황에도 맞을까요?`,
-  (v) => `${v.region} ${v.target} ${v.service}, 지금 시작해도 괜찮을까요?`,
-  (v) => `${v.target} ${v.service} 수업을 ${v.region}에서 찾고 계신가요?`,
-  (v) => `${v.region} ${v.service} 수업이 ${v.target}에게 어떻게 진행되는지 물어보세요`,
-  (v) => `${v.region}에서 ${v.target} ${v.service}를 배우려면 어디서 시작해야 할까요?`,
-  (v) => `${v.target}에게 맞는 ${v.region} ${v.service} 수업을 함께 찾아드립니다`,
-  (v) => `${v.region} ${v.target} ${v.service} 상담, 궁금한 점부터 편하게 물어보세요`,
-  (v) => `${v.target} ${v.service} 공부가 고민이라면 ${v.region}에서 상담받아 보세요`,
-];
-let cachedConfig = null;
-const eligiblePoolCache = new Map();
-
-/** 설정 파일은 빌드마다 한 번만 읽어 10만 페이지에서도 같은 파일을 반복해서 열지 않습니다. */
-function loadContentConfig() {
-  if (cachedConfig) return cachedConfig;
-  cachedConfig = Object.fromEntries(FILES.map((name) => {
-    const filePath = path.join(contentPath, `${name}.json`);
-    if (!fs.existsSync(filePath)) throw new Error(`콘텐츠 설정 파일을 찾을 수 없습니다: ${filePath}`);
-    const parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
-    if (!Array.isArray(parsed.templates) || !parsed.templates.length) {
-      throw new Error(`${name}.json의 templates 배열이 비어 있습니다.`);
-    }
-    return [name, parsed.templates];
-  }));
-  validateMinimums(cachedConfig);
-  return cachedConfig;
-}
-
-function validateMinimums(config) {
-  const minimums = { intro: 20, lesson: 20, benefit: 20, faq: 50, cta: 10, examples: 20 };
-  for (const [name, minimum] of Object.entries(minimums)) {
-    if (config[name].length < minimum) {
-      throw new Error(`${name}.json에는 문장 템플릿이 최소 ${minimum}개 필요합니다.`);
-    }
-  }
-}
-
-function stableHash(value) {
-  let hash = 2166136261;
-  for (const character of String(value)) {
-    hash ^= character.charCodeAt(0);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
-}
-
-/** 제목이나 잘못 연결된 검색의도가 아니라 실제 과목명과 slug로 주제를 하나만 확정합니다. */
+﻿const fs = require('fs');
+const path = require('path');
+const PROFILES = require('../config/content/profiles.json');
+const TYPES = ['elementary_english','middle_english','high_english','elementary_math','middle_math','high_math'];
+const CONTRACT = Object.fromEntries(TYPES.map(type => { const [level,subject] = type.split('_'); return [type,{target:({elementary:'초등학생',middle:'중학생',high:'고등학생'})[level],subject:subject==='english'?'영어':'수학'}]; }));
+// Tags describe pedagogy, not URLs. Text detectors catch mislabeled CSV/config content as a second layer.
+const TOPICS = {
+ english_basics: /영어|어휘|문법|문장 이해|단어|주어(?:와|를|의|\s)|동사/,
+ english_reading: /구문독해|구문 해석|구문을|지문|독해/,
+ math_arithmetic: /연산|자리값|검산/,
+ math_concepts: /수학|계산|식과 답|(?:^|\s)식을|알맞은 식|단원|풀이 전략/,
+ school_assessment: /내신|서술형|수행평가|시험 범위/,
+ college_exam: /수능|모의고사/,
+ study_habits: /복습|학습 습관/,
+ legacy_service: /일본어|토익|오픽|아이엘츠|토플|텝스|지텔프|\b(?:TOEIC|OPIC|IELTS|TOEFL|TEPS|JLPT|JPT|EJU)\b|(?:비즈니스|여행)\s*영어|영어회화|영어\s+회화\s*(?:과외|전문|상담|수업\s*신청)/i,
+};
+const ALLOWED = {
+ elementary_english:['english_basics','study_habits'],
+ middle_english:['english_basics','english_reading','school_assessment','study_habits'],
+ high_english:['english_basics','english_reading','school_assessment','college_exam','study_habits'],
+ elementary_math:['math_arithmetic','math_concepts','study_habits'],
+ middle_math:['math_arithmetic','math_concepts','school_assessment','study_habits'],
+ high_math:['math_arithmetic','math_concepts','school_assessment','college_exam','study_habits'],
+};
+function stableHash(value) { let hash=2166136261; for(const c of String(value)){hash^=c.charCodeAt(0);hash=Math.imul(hash,16777619);}return hash>>>0; }
 function classifyTopic(page) {
-  const source = `${page.subject || ""} ${page.detailKeyword || ""} ${page.slug || ""}`.toLowerCase();
-  if (/toeic[- ]?speaking|토익\s*스피킹/.test(source)) return "toeic-speaking";
-  if (/toeic|토익/.test(source)) return "toeic";
-  if (/opic|오픽/.test(source)) return "opic";
-  if (/ielts|아이엘츠/.test(source)) return "ielts";
-  if (/toefl|토플/.test(source)) return "toefl";
-  if (/teps|텝스/.test(source)) return "teps";
-  if (/jlpt/.test(source)) return "jlpt";
-  if (/jpt/.test(source)) return "jpt";
-  if (/business|비즈니스|업무/.test(source)) return "business";
-  if (/travel|여행/.test(source)) return "travel";
-  if (/japanese|일본어/.test(source)) return "japanese";
-  if (/english|영어/.test(source)) return "english";
-  return page.contentTemplate === "exam" ? "exam" : "conversation";
+ const type=page.template;
+ const contract=CONTRACT[type];
+ if(!contract || page.target!==contract.target || page.subject!==contract.subject) throw Error(`${page.slug || 'page'}: template/target/subject 불일치 (${type}/${page.target}/${page.subject})`);
+ return type;
 }
-
-/** 한 페이지에는 확정 과목과 그 상위 분류만 허용해 다른 시험·언어 문장이 섞이지 않게 합니다. */
-function topicTags(page) {
-  const topic = classifyTopic(page);
-  const parents = {
-    "toeic-speaking": ["toeic-speaking", "exam"], toeic: ["toeic", "exam"],
-    opic: ["opic", "exam"], ielts: ["ielts", "exam"], toefl: ["toefl", "exam"],
-    teps: ["teps", "exam"], jlpt: ["jlpt", "exam"], jpt: ["jpt", "exam"],
-    business: ["business"], travel: ["travel"],
-    japanese: ["japanese", "conversation"], english: ["english", "conversation"],
-    exam: ["exam"], conversation: ["conversation"],
-  };
-  return new Set(["all", ...(parents[topic] || [topic])]);
+function validateText(type,value,label='content') {
+ if(!ALLOWED[type]) throw Error(`알 수 없는 template: ${type}`);
+ const text=String(value || '').replace(/{{[a-z_]+}}/g,'');
+ for(const [topic,pattern] of Object.entries(TOPICS)) if(pattern.test(text) && !ALLOWED[type].includes(topic)) throw Error(`${label}: ${type}에 허용되지 않은 토픽 ${topic}`);
+ for(const [level,pattern] of Object.entries({elementary:/초등(?:학생)?/,middle:/중학생|중등/,high:/고등(?:학생)?/})) if(!type.startsWith(level+'_') && pattern.test(text)) throw Error(`${label}: 다른 학교급 ${level} 혼입`);
+ if(/전국 어디서나 온라인|온라인 전용|항상 방문 가능|(?:해당 지역|[가-힣]+은) 방문수업이 (?:가능|불가능)합니다/.test(text)) throw Error(`${label}: 수업 가능 여부 확정 표현`);
+ if(/성적을 확실히|등급 상승을 보장|단기간에 점수가 향상/.test(text)) throw Error(`${label}: 학습 성과 보장 표현`);
+ return true;
 }
-
-function eligibleTemplates(name, templates, tags) {
-  const cacheKey = `${name}|${[...tags].sort().join(",")}`;
-  if (eligiblePoolCache.has(cacheKey)) return eligiblePoolCache.get(cacheKey);
-  const specific = templates.filter((item) => (item.topics || ["all"]).some((topic) => topic !== "all" && tags.has(topic)));
-  const common = templates.filter((item) => (item.topics || ["all"]).includes("all"));
-  const pool = specific.length ? [...specific, ...common] : common.length ? common : templates;
-  eligiblePoolCache.set(cacheKey, pool);
-  return pool;
+function validateConfig(config) {
+ const fields={intro:['text'],lesson:['text'],benefit:['text'],examples:['text'],faq:['question','answer'],cta:['title','text','label']};
+ for(const [name,required] of Object.entries(fields)) {
+  const groups=config[name]?.templates;
+  if(!groups || Object.keys(groups).some(k=>!TYPES.includes(k))) throw Error(`${name}: template 그룹 오류`);
+  for(const type of TYPES) {
+   const pool=groups[type]; const min=name==='faq'?4:name==='examples'?2:1;
+   if(!Array.isArray(pool)||pool.length<min) throw Error(`${name}/${type}: 전용 콘텐츠 부족 (최소 ${min})`);
+   for(const item of pool) {
+    if(!Array.isArray(item.topics)||!item.topics.length||item.topics.some(t=>!ALLOWED[type].includes(t))) throw Error(`${name}/${type}: topics 불일치`);
+    for(const field of required){if(typeof item[field]!=='string'||!item[field].trim())throw Error(`${name}/${type}: ${field} 누락`);validateText(type,item[field],`${name}/${field}`);renderText(item[field],Object.fromEntries(VARIABLES.map(k=>[k,''])));}
+   }
+  }
+ }
+ if(!Array.isArray(config.common?.availability)||config.common.availability.length<3)throw Error('공통 수업 안내 풀 부족');
+ for(const text of config.common.availability) {
+  if(!/방문/.test(text)||!/화상/.test(text)||!/상담/.test(text)||!/배정/.test(text))throw Error('공통 수업 안내 조건 누락');
+  TYPES.forEach(t=>validateText(t,text,'common'));
+ }
+ return config;
 }
-
-/** 같은 페이지와 같은 종류는 항상 같은 순서로 선택하며, 여러 개를 고를 때 중복하지 않습니다. */
-function selectTemplates(name, templates, tags, seed, count = 1) {
-  const pool = eligibleTemplates(name, templates, tags);
-  const ranked = pool.map((item, index) => ({ item, score: stableHash(`${seed}|${index}|${JSON.stringify(item)}`) }));
-  ranked.sort((a, b) => a.score - b.score);
-  return ranked.slice(0, Math.min(count, ranked.length)).map(({ item }) => item);
+const VARIABLES=['province','region','subject','target','target_short','audience','keyword','service','intent','concern','focus','method','result','tone','availability'];
+function renderText(text,variables){return text.replace(/{{([a-z_]+)}}/g,(m,k)=>{if(!(k in variables))throw Error(`알 수 없는 변수 ${m}`);return variables[k];}).replace(/\s+/g,' ').trim();}
+function loadContentConfig(directory=path.resolve(__dirname,'../config/content')) {
+ const config=Object.fromEntries(['intro','lesson','benefit','faq','cta','examples','common'].map(name=>[name,JSON.parse(fs.readFileSync(path.join(directory,name+'.json'),'utf8'))]));
+ return validateConfig(config);
 }
-
-/** FAQ·예시·CTA는 가장 구체적인 과목 템플릿을 최소 하나 포함합니다. */
-function selectTopicTemplates(name, templates, tags, seed, count = 1) {
-  const primaryTopic = TOPIC_PRIORITY.find((topic) => tags.has(topic) && templates.some((item) => (item.topics || []).includes(topic)));
-  if (!primaryTopic) return selectTemplates(name, templates, tags, seed, count);
-  const primaryPool = templates.filter((item) => (item.topics || []).includes(primaryTopic));
-  const selected = selectTemplates(`${name}:${primaryTopic}`, primaryPool, new Set([primaryTopic]), `${seed}|primary`, 1);
-  const remainder = selectTemplates(name, templates, tags, `${seed}|remainder`, count + 2)
-    .filter((item) => !selected.includes(item));
-  return [...selected, ...remainder].slice(0, count);
+let cached;
+function choose(pool,seed,count=1){if(pool.length<count)throw Error('전용 콘텐츠 부족');return pool.map((item,i)=>({item,score:stableHash(seed+'|'+i+'|'+JSON.stringify(item))})).sort((a,b)=>a.score-b.score).slice(0,count).map(x=>x.item);}
+function createPageContent(page,context,config) {
+ const type=classifyTopic(page); config=config?validateConfig(config):(cached ||= loadContentConfig());
+ const seed=[page.slug,type,page.target,page.subject,page.searchIntent,page.tone].join('|');
+ const availability=choose(config.common.availability,seed+'|availability')[0];
+ const variables={...context,province:page.province,region:page.region,subject:page.subject,target:page.target,target_short:PROFILES[type].target_short,audience:page.target,keyword:page.keyword,availability};
+ const render=item=>Object.fromEntries(Object.entries(item).filter(([k])=>k!=='topics').map(([k,v])=>[k,renderText(v,variables)]));
+ const select=(name,count=1)=>choose(config[name].templates[type],seed+'|'+name,count).map(render);
+ const result={intro:select('intro')[0].text,lesson:select('lesson')[0].text,benefit:select('benefit')[0].text,examples:select('examples',2).map(x=>x.text),faqs:select('faq',4),cta:select('cta')[0],availability};
+ result.learning=require('./problem-learning').createLearningContent(page);
+ result.faqs=result.learning.faqs; result.cta={...result.cta,...result.learning.cta};
+ validateText(type,JSON.stringify(result),'generated content');return Object.freeze(result);
 }
-
-function renderText(template, variables) {
-  return String(template).replace(/{{([a-z_]+)}}/g, (match, name) => {
-    if (!(name in variables)) throw new Error(`콘텐츠 템플릿에 알 수 없는 변수가 있습니다: ${match}`);
-    return variables[name];
-  }).replace(/\s+/g, " ").trim();
-}
-
-function makeVariables(page, context) {
-  return {
-    province: page.province || "전국",
-    region: page.region || "지역",
-    subject: page.subject || context.service,
-    target: page.target || "수강생",
-    audience: page.target || "수강생",
-    keyword: page.keyword,
-    service: context.service,
-    intent: context.intent,
-    concern: context.concern,
-    focus: context.focus,
-    method: context.method,
-    result: context.result,
-  };
-}
-
-/** 한 페이지에 필요한 본문·FAQ·CTA를 빌드 시점에 완성합니다. */
-function createPageContent(page, context) {
-  const config = loadContentConfig();
-  const tags = topicTags(page);
-  const seed = [page.slug, page.region, page.subject, page.target, page.searchIntent].join("|");
-  const variables = makeVariables(page, context);
-  const renderOne = (name) => renderText(selectTemplates(name, config[name], tags, `${seed}|${name}`)[0].text, variables);
-  const contextualFaqPool = config.faq.filter((item) => item.question.includes("{{region}}") && item.question.includes("{{audience}}"));
-  const contextualFaq = selectTemplates("faq:contextual", contextualFaqPool, new Set(["all"]), `${seed}|faq|contextual`)[0];
-  const topicFaqs = selectTopicTemplates("faq", config.faq, tags, `${seed}|faq`, 5)
-    .filter((item) => item !== contextualFaq)
-    .slice(0, 3);
-  const faqItems = [contextualFaq, ...topicFaqs].map((item) => ({
-    question: renderText(item.question, variables),
-    answer: renderText(item.answer, variables),
-  }));
-  const intro = renderOne("intro");
-  const localLessonLead = `${page.region} ${page.target ? `${page.target} ` : ""}${context.service} 수업에서는`;
-  const contextualSentence = (text) => `${localLessonLead} ${text}`;
-  const lesson = contextualSentence(renderOne("lesson"));
-  const benefit = contextualSentence(renderOne("benefit"));
-  const exampleItems = selectTopicTemplates("examples", config.examples, tags, `${seed}|examples`, 2)
-    .map((item) => contextualSentence(renderText(item.text, variables)));
-  const ctaTemplate = selectTopicTemplates("cta", config.cta, tags, `${seed}|cta`)[0];
-  let ctaTitle = renderText(ctaTemplate.title, variables);
-  if (page.target) {
-    const titlePattern = TARGET_CTA_TITLES[stableHash(`${seed}|cta-title`) % TARGET_CTA_TITLES.length];
-    ctaTitle = titlePattern({ region: page.region, target: page.target, service: context.service });
-  } else if (!ctaTitle.includes(page.region)) ctaTitle = `${page.region}에서 ${ctaTitle}`;
-  return Object.freeze({
-    intro,
-    lesson,
-    benefit,
-    examples: Object.freeze(exampleItems),
-    faqs: Object.freeze(faqItems),
-    cta: Object.freeze({
-      title: ctaTitle,
-      text: renderText(ctaTemplate.text, variables),
-      label: renderText(ctaTemplate.label, variables),
-    }),
-  });
-}
-
-module.exports = { classifyTopic, createPageContent, loadContentConfig, stableHash };
+for(const type of TYPES){const p=PROFILES[type];if(!p||p.target!==CONTRACT[type].target||p.subject!==CONTRACT[type].subject)throw Error(`프로필 불일치 ${type}`);validateText(type,JSON.stringify(p),type);}
+module.exports={PROFILES,TYPES,classifyTopic,createPageContent,loadContentConfig,validateConfig,validateText,stableHash};

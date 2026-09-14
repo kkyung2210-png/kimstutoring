@@ -1,7 +1,6 @@
 {
   "version": 1,
   "mode": "mock",
-  "siteUrl": "https://kimsenglish.co.kr/",
   "dateRangeDays": 28,
   "rowLimit": 25000,
   "fallbackToMock": true,

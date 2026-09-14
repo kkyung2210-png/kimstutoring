@@ -1,0 +1,34 @@
+const fs=require('fs'),path=require('path'),assert=require('assert');
+const {loadPages}=require('./generate-pages');
+const {stripTags}=require('./seo-audit/validators');
+const {sharedEditorialCss}=require('./detail-design-system');
+const root=path.resolve(__dirname,'..'),dist=path.join(root,'dist'),dir=path.join(root,'reports/detail-design-qa');
+const before=JSON.parse(fs.readFileSync(path.join(dir,'before.json')));
+const home=fs.readFileSync(path.join(dist,'index.html'),'utf8');
+const header=h=>h.match(/<header\b[\s\S]*?<\/header>/)[0];
+const footer=h=>h.match(/<footer\b[\s\S]*?<\/footer>/)[0];
+const normalizeHeader=h=>h.replaceAll('href="/#','href="#');
+const normalizeText=s=>s.replace(/\b(?:WHAT|WHEN|REVIEW|CHECK)\b/g,'').replace(/\s+/g,' ').trim();
+const failures=[],samples=[];
+const css=fs.readFileSync(path.join(dist,'detail-learning.css'),'utf8'),shared=sharedEditorialCss(root);
+assert(css.startsWith(shared));assert(!css.includes('.home-editorial'));assert(!css.includes('linear-gradient'));
+const expectedClasses=['detail-page','detail-hero','detail-problem','detail-diagnosis','detail-lesson','detail-selfstudy','detail-student-type','detail-mode','detail-faq','detail-cta'];
+const metrics={pages:0,headerMismatch:0,footerMismatch:0,schemaChanged:0,contentChanged:0,relatedChanged:0,oldDesignPages:0};
+const fail=(key,slug)=>{metrics[key]++;failures.push({key,slug});};
+for(const p of loadPages().pages){
+ const h=fs.readFileSync(path.join(dist,p.slug,'index.html'),'utf8');metrics.pages++;
+ if(normalizeHeader(header(h))!==normalizeHeader(header(home)))fail('headerMismatch',p.slug);
+ if(footer(h)!==footer(home))fail('footerMismatch',p.slug);
+ if(h.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]!==before[p.slug].schema)fail('schemaChanged',p.slug);
+ const main=h.match(/<main[^>]*>([\s\S]*?)<\/main>/)[1];
+ if(normalizeText(stripTags(main))!==normalizeText(before[p.slug].mainText))fail('contentChanged',p.slug);
+ if(main.match(/<section[^>]*id="related"[\s\S]*?<\/section>/)[0]!==before[p.slug].related)fail('relatedChanged',p.slug);
+ if(/class="(?:hero|hero-panel|panel|cta|button)(?:"|\s)/.test(main))fail('oldDesignPages',p.slug);
+ for(const name of expectedClasses)assert(new RegExp(`class="[^"]*\\b${name}\\b`).test(h),name);
+ const actions=main.match(/<div class="page-cta-actions">([\s\S]*?)<\/div>/)[1];
+ assert(actions.includes('class="he-button"'));assert.equal((actions.match(/class="he-text-link"/g)||[]).length,2);
+ if(p.slug.startsWith('anyang-'))samples.push({slug:p.slug,template:p.template,sections:expectedClasses,sourceChecks:'passed',visualChecks:'unavailable'});
+}
+const report={metrics,failures,samples,sharedStyles:'Home tokens, header, primary button, secondary text link and footer rules extracted from assets/home.css during build',widths:[1440,1280,768,430,390,360],responsive:{source:'<=900px split sections stack; <=600px actions, modes and related list stack; primary CTA full width',mobileOverflow:null,desktopOverflow:null,cls:null,reason:'Browser runtime reported No browser is available; no visual measurement claimed'},preview:'http://localhost:8080/'};
+fs.writeFileSync(path.join(dir,'report.json'),JSON.stringify(report,null,2));
+console.log(JSON.stringify({metrics,samples:samples.length,failures},null,2));assert.equal(failures.length,0);assert.equal(samples.length,6);

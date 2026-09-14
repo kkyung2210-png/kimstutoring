@@ -139,6 +139,12 @@ function createRelatedIndex(pages) {
         accept: (candidate) => key(candidate.subject) !== key(page.subject),
         distinct: (candidate) => candidate.subject,
       }),
+      // Detail navigation: adjacent grade in the same subject, then the other subject in this grade.
+      localLessons: regionPool.filter(candidate => candidate.slug !== page.slug).sort((a,b) => {
+        const levels = {초등학생:0, 중학생:1, 고등학생:2};
+        const rank = candidate => candidate.subject === page.subject && Math.abs(levels[candidate.target]-levels[page.target]) === 1 ? 0 : candidate.target === page.target && candidate.subject !== page.subject ? 1 : 2;
+        return rank(a)-rank(b) || levels[a.target]-levels[b.target] || a.slug.localeCompare(b.slug);
+      }).slice(0,5).map(candidate => candidate.slug),
       sameProvince: pick(provincePool, page, 5, {
         accept: (candidate) => key(candidate.region) !== key(page.region),
         distinct: (candidate) => candidate.region,

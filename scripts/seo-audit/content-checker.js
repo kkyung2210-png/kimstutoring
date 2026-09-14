@@ -96,8 +96,18 @@ function checkContent(document, searchItem, config) {
   if (searchItem?.region && countOccurrences(document.text, searchItem.region) > config.regionRepeatLimit) problems.push(issue("WARNING", "contentQuality", "region-overused", "본문에서 지역명이 설정 기준보다 많이 반복됩니다."));
   if (rules.cta && !document.hasCta) problems.push(issue("ERROR", "contentQuality", "cta-missing", "CTA 영역이 없습니다."));
   if (rules.faq && document.faqQuestions.length < minimumFaq) problems.push(issue("WARNING", "contentQuality", "faq-too-few", `FAQ가 ${minimumFaq}개보다 적습니다.`, { count: document.faqQuestions.length }));
-  if (rules.lessonSummary && !document.hasLessonSummary) problems.push(issue("WARNING", "contentQuality", "lesson-summary-missing", "수업 상담 요약 영역이 없습니다."));
-  if (rules.recommendedAudience && !document.hasRecommendedAudience) problems.push(issue("WARNING", "contentQuality", "recommended-audience-missing", "추천 대상 영역이 없습니다."));
+  // Problem-led detail pages replace the former summary/fit boxes with linked learning sections.
+  const problemLearning = /<section[^>]*id="problems"/.test(document.html);
+  if (problemLearning) {
+    const topics = name => [...document.html.matchAll(new RegExp(`data-${name}-topic="([^"]+)"`, 'g'))].map(m=>m[1]);
+    const concerns=topics('problem'),diagnoses=topics('diagnosis'),actions=topics('action');
+    if(concerns.length<5 || diagnoses.length<2 || diagnoses.length>4 || new Set(concerns).size!==concerns.length || JSON.stringify(diagnoses)!==JSON.stringify(actions) || diagnoses.some(id=>!concerns.includes(id))) {
+      problems.push(issue("ERROR", "contentQuality", "learning-topic-mismatch", "고민·진단·수업 대응의 연결이 누락되거나 일치하지 않습니다."));
+    }
+    for(const id of ['self-study','student-types','lesson-method'])if(!new RegExp(`<section[^>]*id="${id}"[\\s\\S]*?<h[23]>[\\s\\S]+?</section>`).test(document.html))problems.push(issue("ERROR", "contentQuality", "learning-section-missing", `${id} 학습 안내가 없습니다.`));
+  }
+  if (rules.lessonSummary && !document.hasLessonSummary && !problemLearning) problems.push(issue("WARNING", "contentQuality", "lesson-summary-missing", "수업 상담 요약 영역이 없습니다."));
+  if (rules.recommendedAudience && !document.hasRecommendedAudience && !problemLearning) problems.push(issue("WARNING", "contentQuality", "recommended-audience-missing", "추천 대상 영역이 없습니다."));
   if (rules.relatedSection && !document.hasRelatedSection) problems.push(issue("WARNING", "internalLinks", "related-section-missing", "관련 페이지 영역이 없습니다."));
   return problems;
 }

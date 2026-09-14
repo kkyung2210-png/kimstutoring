@@ -1,24 +1,118 @@
 {
-  "templates": [
-    {"topics":["all"],"text":"현재 실력에서 바로 해볼 수 있는 내용부터 시작하고, 익힌 것은 수업 안에서 직접 써봅니다."},
-    {"topics":["all"],"text":"{{focus}} 가운데 이미 아는 부분은 빠르게 지나가고 막히는 부분에는 연습 시간을 더 씁니다."},
-    {"topics":["all"],"text":"배우는 이유와 가능한 공부 시간을 듣고 {{method}} 흐름을 개인 일정에 맞게 조절합니다."},
-    {"topics":["all"],"text":"설명만 듣는 데 그치지 않고 {{focus}} 내용을 직접 사용한 뒤 부족한 부분을 다시 점검합니다."},
-    {"topics":["all"],"text":"‘{{concern}}’이라고 느끼는 부분을 직접 다뤄 보고, 잘되지 않으면 표현이나 풀이 방법을 바꿔 다시 해봅니다."},
-    {"topics":["conversation"],"text":"짧은 표현을 익힌 뒤 질문과 답변, 상황 대화로 범위를 넓혀 실제 말하기에 연결합니다."},
-    {"topics":["conversation"],"text":"듣고 따라 하는 연습에서 시작해 자신의 문장으로 바꾸어 말하고 즉시 피드백을 받습니다."},
-    {"topics":["english"],"text":"자주 쓰는 영어 표현을 문장 단위로 익히고 발음과 응답 속도를 함께 점검합니다."},
-    {"topics":["japanese"],"text":"기초 문형과 어휘를 확인하고 장면별 일본어 대화로 자연스럽게 이어갑니다."},
-    {"topics":["exam"],"text":"시험 구조를 확인한 뒤 취약 영역, 문제 적용, 오답 복습을 일정한 흐름으로 반복합니다."},
-    {"topics":["exam"],"text":"목표에 필요한 영역을 우선 배치하고 풀이 근거와 시간 사용 방법을 함께 훈련합니다."},
-    {"topics":["toeic"],"text":"LC와 RC의 현재 상태를 나누어 확인하고 유형별 접근과 오답 원인을 기록하며 보완합니다."},
-    {"topics":["opic"],"text":"자주 다루는 주제의 답변 소재를 정리하고 도입, 설명, 마무리 순서로 말하는 연습을 합니다."},
-    {"topics":["ielts"],"text":"영역별 평가 기준을 이해하고 답변 구성과 표현을 실제 문제에 적용하며 수정합니다."},
-    {"topics":["business"],"text":"실제 업무 장면을 정하고 필요한 표현을 익힌 뒤 역할 연습으로 전달력을 확인합니다."},
-    {"topics":["business"],"text":"회의, 보고, 이메일 가운데 우선 상황을 고르고 자주 쓰는 문장을 업무 맥락에 맞게 다듬습니다."},
-    {"topics":["travel"],"text":"공항, 숙소, 식당, 이동 상황을 순서대로 연습하며 바로 꺼내 쓸 수 있는 문장을 만듭니다."},
-    {"topics":["travel"],"text":"예상 질문에 짧게 답하는 연습을 한 뒤 요청, 변경, 문제 해결에 필요한 말까지 범위를 넓힙니다."},
-    {"topics":["all"],"text":"매 수업에서 배운 내용과 어려웠던 지점을 기록하고 다음 학습의 우선순위에 반영합니다."},
-    {"topics":["all"],"text":"배운 내용을 이해하는 데서 끝내지 않고 반복해서 써 본 뒤 다음 수업에서 다시 확인합니다."}
-  ]
+  "templates": {
+    "elementary_english": [
+      {
+        "topics": [
+          "english_basics",
+          "study_habits"
+        ],
+        "text": "{{method}} 학생이 직접 설명하거나 풀어보는 과정을 확인해 다음 연습의 난이도를 조절합니다."
+      },
+      {
+        "topics": [
+          "english_basics",
+          "study_habits"
+        ],
+        "text": "{{target_short}} {{subject}}의 학습 순서는 학생의 설명과 풀이를 보며 조절합니다. 그림과 짧은 글로 어휘의 뜻을 확인하고 문장의 주어와 동사를 찾아 읽은 뒤 소량의 복습을 진행합니다."
+      }
+    ],
+    "middle_english": [
+      {
+        "topics": [
+          "english_basics",
+          "english_reading",
+          "school_assessment",
+          "study_habits"
+        ],
+        "text": "{{method}} 학생이 직접 설명하거나 풀어보는 과정을 확인해 다음 연습의 난이도를 조절합니다."
+      },
+      {
+        "topics": [
+          "english_basics",
+          "english_reading",
+          "school_assessment",
+          "study_habits"
+        ],
+        "text": "{{target_short}} {{subject}}의 학습 순서는 학생의 설명과 풀이를 보며 조절합니다. 학교 교재와 시험 범위를 확인한 뒤 어휘와 문법을 지문에 적용하고 서술형 답안 및 수행평가 준비 과정을 점검합니다."
+      }
+    ],
+    "high_english": [
+      {
+        "topics": [
+          "english_basics",
+          "english_reading",
+          "school_assessment",
+          "college_exam",
+          "study_habits"
+        ],
+        "text": "{{method}} 학생이 직접 설명하거나 풀어보는 과정을 확인해 다음 연습의 난이도를 조절합니다."
+      },
+      {
+        "topics": [
+          "english_basics",
+          "english_reading",
+          "school_assessment",
+          "college_exam",
+          "study_habits"
+        ],
+        "text": "{{target_short}} {{subject}}의 학습 순서는 학생의 설명과 풀이를 보며 조절합니다. 문장 구조와 지문 전개를 분석하고 학교 시험 범위 및 모의고사 문항으로 근거 찾기와 시간 배분을 연습합니다."
+      }
+    ],
+    "elementary_math": [
+      {
+        "topics": [
+          "math_arithmetic",
+          "math_concepts",
+          "study_habits"
+        ],
+        "text": "{{method}} 학생이 직접 설명하거나 풀어보는 과정을 확인해 다음 연습의 난이도를 조절합니다."
+      },
+      {
+        "topics": [
+          "math_arithmetic",
+          "math_concepts",
+          "study_habits"
+        ],
+        "text": "{{target_short}} {{subject}}의 학습 순서는 학생의 설명과 풀이를 보며 조절합니다. 그림과 구체적인 수로 기초개념을 확인하고 문제의 조건과 구할 것을 표시한 뒤 풀이 순서와 계산을 점검합니다."
+      }
+    ],
+    "middle_math": [
+      {
+        "topics": [
+          "math_concepts",
+          "school_assessment",
+          "study_habits"
+        ],
+        "text": "{{method}} 학생이 직접 설명하거나 풀어보는 과정을 확인해 다음 연습의 난이도를 조절합니다."
+      },
+      {
+        "topics": [
+          "math_concepts",
+          "school_assessment",
+          "study_habits"
+        ],
+        "text": "{{target_short}} {{subject}}의 학습 순서는 학생의 설명과 풀이를 보며 조절합니다. 시험 범위와 취약단원을 확인하고 개념 설명, 유형별 문제풀이, 서술형 첨삭, 오답 재풀이 순서로 점검합니다."
+      }
+    ],
+    "high_math": [
+      {
+        "topics": [
+          "math_concepts",
+          "school_assessment",
+          "college_exam",
+          "study_habits"
+        ],
+        "text": "{{method}} 학생이 직접 설명하거나 풀어보는 과정을 확인해 다음 연습의 난이도를 조절합니다."
+      },
+      {
+        "topics": [
+          "math_concepts",
+          "school_assessment",
+          "college_exam",
+          "study_habits"
+        ],
+        "text": "{{target_short}} {{subject}}의 학습 순서는 학생의 설명과 풀이를 보며 조절합니다. 수강 과목과 시험 범위를 확인하고 취약단원의 개념을 연결한 뒤 유형별 접근, 모의고사 풀이 전략, 오답 원인을 분석합니다."
+      }
+    ]
+  }
 }

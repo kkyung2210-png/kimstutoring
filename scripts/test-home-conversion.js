@@ -1,0 +1,33 @@
+const fs=require('fs'),path=require('path'),assert=require('assert'),crypto=require('crypto');
+const root=path.resolve(__dirname,'..'),reportPath=path.join(root,'reports/home-conversion-qa');
+const {loadPages}=require('./generate-pages');
+const {createHubIndex}=require('./generate-hub-index');
+const {generateHomePage}=require('./generate-home-page');
+const {parseDocument,stripTags}=require('./seo-audit/validators');
+const {checkSchema}=require('./seo-audit/schema-checker');
+const {checkDocumentContent}=require('./seo-audit/content-checker');
+const {loadConfig}=require('./seo-audit/rules');
+const {resolveInternalHref}=require('./seo-audit/link-checker');
+const data=loadPages(),hubIndex=createHubIndex(data.pages),dist=path.join(root,'dist');
+const d=parseDocument(path.join(dist,'index.html'),dist),html=d.html;
+assert.equal(d.h1.length,1);assert.equal(d.h1[0],'초등부터 고등까지 1:1 맞춤과외');
+const schema=checkSchema(d,data.baseUrl+'/');assert.equal(schema.issues.filter(x=>x.severity==='ERROR').length,0);
+const faq=[...html.matchAll(/<details class="faq-item"[^>]*>[\s\S]*?<h3>([\s\S]*?)<\/h3>[\s\S]*?<div class="faq-answer"><p>([\s\S]*?)<\/p>/g)].map(m=>({question:stripTags(m[1]),answer:stripTags(m[2])}));
+const faqSchema=d.jsonLdTexts.flatMap(t=>JSON.parse(t)['@graph']).find(x=>x['@type']==='FAQPage');
+assert.deepStrictEqual(faq,faqSchema.mainEntity.map(f=>({question:f.name,answer:f.acceptedAnswer.text})));assert.equal(faq.length,8);
+const broken=[];for(const link of d.links){const to=resolveInternalHref(link.href,'/',data.baseUrl);if(['skip','external'].includes(to.type))continue;const file=path.join(dist,to.path,'index.html');if(!fs.existsSync(file)){broken.push(link.href);continue;}if(to.hash){const ids=new Set([...fs.readFileSync(file,'utf8').matchAll(/\bid=["']([^"']+)["']/g)].map(m=>m[1]));if(!ids.has(to.hash.slice(1)))broken.push(link.href);}}
+assert.equal(broken.length,0);
+assert(!/킴스튜터링|Kim['’]s English|kimsenglish|일본어|영어회화|TOEIC|OPIC|IELTS|TOEFL|JLPT|비즈니스영어|여행영어|전국 방문 가능|data-review-carousel/.test(html));
+assert(d.links.some(l=>l.href==='#consultation'&&l.text.startsWith('무료 상담 신청')));assert(d.links.some(l=>l.href==='#lessons'&&l.text.startsWith('맞춤 수업 찾기')));
+assert(html.includes('href="/home.css"'));assert(html.includes('class="home-editorial"'));
+const errors=checkDocumentContent(d,{baseUrl:data.baseUrl,distPath:dist,config:loadConfig(root)}).filter(x=>x.severity==='ERROR');assert.equal(errors.length,0);
+// Renderer-level extension test only: production template contracts are intentionally unchanged.
+const fixture=path.join(reportPath,'subject-extension');fs.mkdirSync(fixture,{recursive:true});
+const future={...data,pages:[...data.pages,{...data.pages[0],subject:'국어',slug:'fixture-korean',keyword:'테스트 초등학생 국어과외'}]};
+generateHomePage({root,outputPath:fixture,data:future,hubIndex:{...hubIndex,subject:[...hubIndex.subject,{value:'국어',url:'/fixture-korean-hub/'},{value:'과학',url:'/inactive-fixture/'}]}});
+const extended=fs.readFileSync(path.join(fixture,'index.html'),'utf8');assert(extended.includes('<option>국어</option>'));assert(extended.includes('value="초등 국어"'));assert(!extended.includes('inactive-fixture'));assert(extended.includes('영어·수학·국어'));
+const before=JSON.parse(fs.readFileSync(path.join(reportPath,'before.json'),'utf8'));const hash=f=>crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex');
+for(const [f,v]of Object.entries(before.html))assert.equal(hash(path.join(dist,f)),v,f);
+for(const [f,v]of Object.entries(before.source))assert.equal(hash(path.join(root,f)),v,f);
+const report={title:d.title,h1:d.h1[0],description:d.description,sections:d.headings.filter(h=>h.level===2).map(h=>h.text),faq,brokenLinks:broken,seoErrors:errors,schemaErrors:schema.issues.filter(x=>x.severity==='ERROR'),unchangedDetailAndHubFiles:Object.keys(before.html).length,protectedSourcesUnchanged:true,subjectExtension:'renderer test passed; production detail template expansion remains separate',mobile:'HTML/CSS inspected; no available browser for actual 360–430px viewport testing'};
+fs.writeFileSync(path.join(reportPath,'report.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));

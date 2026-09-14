@@ -4,7 +4,7 @@
  * final 시트에 키워드와 주소를 새로 만듭니다.
  */
 const APP = Object.freeze({
-  BASE_URL: 'https://kimsenglish.co.kr',
+  BASE_URL: 'https://kimstutoring.co.kr',
   SHEETS: Object.freeze({
     FINAL: 'final',
     REGION: 'region',
@@ -41,8 +41,20 @@ const DESCRIPTION_PATTERNS = Object.freeze([
   function (c) { return c.lesson + ' 때문에 고민이 있다면 ' + c.region + ' 수업에서 지금 필요한 연습부터 함께 해볼 수 있습니다. ' + c.practice; },
 ]);
 
-const ALLOWED_TEMPLATES = Object.freeze(['conversation', 'exam', 'business', 'travel']);
+const ALLOWED_TEMPLATES = Object.freeze([
+  'elementary_english', 'middle_english', 'high_english',
+  'elementary_math', 'middle_math', 'high_math',
+]);
+const TUTORING_TARGETS = Object.freeze({ '초등학생': 'elementary', '중학생': 'middle', '고등학생': 'high' });
+const TUTORING_SUBJECTS = Object.freeze({ '영어': 'english', '수학': 'math' });
+const TUTORING_PATTERN = '{지역} {대상} {세부키워드}{접미어}';
 const ALLOWED_TONES = Object.freeze(['친근형', '신뢰형', '전문형', '목표달성형', '차분형', '코칭형']);
+/* 수업 방식 정책: region은 기존 5개 컬럼을 사용하며 가능 여부를 저장하지 않습니다.
+ * details의 수업방식에는 "지역과 일정에 따라 1:1 방문수업 또는 화상수업으로 진행하며..."
+ * 또는 "방문수업 가능 여부는 지역과 일정, 강사 배정에 따라 상담 후 안내합니다."처럼
+ * 조건부 안내를 작성합니다. 입력 문구는 final의 lesson_method에 그대로 전달하며
+ * 지역명으로 방문 가능/불가능을 추정하거나 keyword/slug 조합을 추가하지 않습니다.
+ */
 /** Google Sheets를 열면 위쪽 메뉴에 SEO 도구를 추가합니다. */
 function onOpen() {
   SpreadsheetApp.getUi()
@@ -100,6 +112,7 @@ function readSource_(spreadsheet) {
       name: clean_(row.cells[1]),
       slug: makeSlugPart_(row.cells[2], 'target', row.number),
       type: clean_(row.cells[3]),
+      rowNumber: row.number,
     };
   });
   const details = detailRows.map(function (row) {
@@ -138,11 +151,11 @@ function readSource_(spreadsheet) {
   validateSource_(regions, targets, details, rules);
   return { regions: regions, targets: targets, details: details, rules: rules };
 }
-/** 모든 대표 규칙을 조합하고 중복을 제거합니다. */
+/** 모든 대표 규칙을 조합하고 충돌과 지역별 6개 조합을 검사합니다. */
 function buildRows_(source) {
   const output = [];
-  const keywordKeys = new Set();
-  const slugKeys = new Set();
+  const keywordKeys = new Map();
+  const slugKeys = new Map();
   source.rules.forEach(function (rule) {
     source.regions.forEach(function (region) {
       source.details.forEach(function (detail) {
@@ -159,6 +172,7 @@ function buildRows_(source) {
       });
     });
   });
+  validateRegionCombinations_(source.regions, output);
   return output;
 }
 /** 키워드와 slug가 모두 처음 나온 값일 때 final 행을 추가합니다. */
@@ -167,9 +181,16 @@ function appendRow_(output, keywordKeys, slugKeys, rule, region, target, detail)
   const slug = buildSlug_(rule, region, target, detail);
   const keywordKey = keyword.toLocaleLowerCase();
   const slugKey = slug.toLocaleLowerCase();
-  if (keywordKeys.has(keywordKey) || slugKeys.has(slugKey)) return;
-  keywordKeys.add(keywordKey);
-  slugKeys.add(slugKey);
+  const origin = 'region=' + region.province + ' ' + region.name + ' (' + region.slug + ')' +
+    ', target=' + (target ? target.name : '없음') +
+    ', detail=' + detail.name + ' / ' + detail.bodyTemplate + ' (details ' + detail.rowNumber + '행)' +
+    ', rules=' + rule.rowNumber + '행';
+  const conflicts = [];
+  if (keywordKeys.has(keywordKey)) conflicts.push('keyword "' + keyword + '": 기존 [' + keywordKeys.get(keywordKey) + ']');
+  if (slugKeys.has(slugKey)) conflicts.push('slug "' + slug + '": 기존 [' + slugKeys.get(slugKey) + ']');
+  if (conflicts.length) throw new Error('중복 충돌: ' + conflicts.join('\n') + '\n현재 [' + origin + ']');
+  keywordKeys.set(keywordKey, origin);
+  slugKeys.set(slugKey, origin);
   const targetName = rule.hasTarget && target ? target.name : '';
   const summary = makeSummary_(region.province, region.name, targetName, detail);
   const description = makeDescription_(slug, region.province, region.name, targetName, detail);
@@ -260,6 +281,18 @@ function inspectFinalRows_(rows) {
 
 /** 활성 details 행의 H~M과 본문템플릿 값이 올바른지 먼저 검사합니다. */
 function validateDetailContent_(detail) {
+  const targetSlug = TUTORING_TARGETS[detail.restriction];
+  const subjectSlug = TUTORING_SUBJECTS[detail.name];
+  const label = 'details 시트 ' + detail.rowNumber + '행';
+  if (!Object.prototype.hasOwnProperty.call(TUTORING_SUBJECTS, detail.name)) {
+    throw new Error(label + ': 활성 세부키워드는 영어 / 수학만 허용합니다. 현재: ' + detail.name);
+  }
+  if (!Object.prototype.hasOwnProperty.call(TUTORING_TARGETS, detail.restriction)) {
+    throw new Error(label + ': 대상제한은 초등학생 / 중학생 / 고등학생 중 정확한 대상명 하나여야 합니다. 현재: ' + detail.restriction);
+  }
+  if (detail.slug !== subjectSlug || detail.suffix !== '과외') {
+    throw new Error(label + ': ' + detail.name + ' 영문주소는 ' + subjectSlug + ', 접미어는 과외여야 합니다.');
+  }
   const required = [
     ['본문템플릿(G)', detail.bodyTemplate], ['검색의도(H)', detail.searchIntent],
     ['핵심고민(I)', detail.concern], ['수업초점(J)', detail.lessonFocus],
@@ -270,8 +303,10 @@ function validateDetailContent_(detail) {
   });
   const template = detail.bodyTemplate.toLowerCase();
   if (ALLOWED_TEMPLATES.indexOf(template) === -1) {
-    throw new Error('details 시트 ' + detail.rowNumber + '행의 본문템플릿은 conversation, exam, business, travel 중 하나여야 합니다.');
+    throw new Error(label + '의 본문템플릿은 ' + ALLOWED_TEMPLATES.join(', ') + ' 중 하나여야 합니다.');
   }
+  const expectedTemplate = targetSlug + '_' + subjectSlug;
+  if (template !== expectedTemplate) throw new Error(label + ': ' + detail.restriction + ' × ' + detail.name + '의 본문템플릿은 ' + expectedTemplate + '여야 합니다. 현재: ' + template);
   detail.bodyTemplate = template;
   if (ALLOWED_TEMPLATES.indexOf(detail.searchIntent.toLowerCase()) !== -1) {
     throw new Error('details 시트 ' + detail.rowNumber + '행의 검색의도에 템플릿 이름이 들어 있습니다. H열과 G열을 확인해 주세요.');
@@ -294,15 +329,13 @@ function fillPattern_(rule, region, target, detail) {
   Object.keys(replacements).forEach(function (name) {
     keyword = keyword.split('{' + name + '}').join(clean_(replacements[name]));
   });
-  // 접미어가 있으면 앞에 공백을 자동 추가하고 없으면 완전히 제거합니다.
-  const suffixText = detail.suffix ? ' ' + detail.suffix : '';
-  keyword = keyword.split('{접미어}').join(suffixText);
+  // 공백은 rules 패턴이 결정하며 접미어 앞에 자동으로 추가하지 않습니다.
+  keyword = keyword.split('{접미어}').join(clean_(detail.suffix));
   const unknown = keyword.match(/\{[^{}]+\}/);
   if (unknown) {
     throw new Error('rules 시트 ' + rule.rowNumber + '행에 알 수 없는 항목이 있습니다: ' + unknown[0]);
   }
-  keyword = keyword.replace(/\s+/g, ' ').trim();
-  if (!keyword) throw new Error('rules 시트 ' + rule.rowNumber + '행에서 빈 키워드가 생성되었습니다.');
+  if (!keyword.trim()) throw new Error('rules 시트 ' + rule.rowNumber + '행에서 빈 키워드가 생성되었습니다.');
   return keyword;
 }
 /** 패턴에 실제로 있는 세 주소 항목만 region-target-details 순서로 연결합니다. */
@@ -319,15 +352,15 @@ function buildSlug_(rule, region, target, detail) {
   }
   return parts.join('-');
 }
-/** details의 대상제한에 현재 대상 또는 대상유형이 포함되는지 확인합니다. */
+/** 대상유형이나 별칭을 사용하지 않고 정확한 대상명 하나만 연결합니다. */
 function allowsTarget_(restriction, target) {
   const value = clean_(restriction);
-  if (!value || value === '전체') return true;
-  const allowed = value.split('|').map(clean_).filter(Boolean);
-  return allowed.indexOf(target.name) !== -1 ||
-    (target.type && allowed.indexOf(target.type) !== -1);
+  if (!Object.prototype.hasOwnProperty.call(TUTORING_TARGETS, value)) {
+    throw new Error('대상제한은 초등학생 / 중학생 / 고등학생 중 하나여야 합니다. 현재: ' + value);
+  }
+  return value === target.name;
 }
-/** 새 5열 region 구조를 읽고, 이전 3열 구조도 계속 사용할 수 있게 합니다. */
+/** 기존 5열 region 구조를 읽고 이전 3열 구조도 지원합니다. */
 function readRegions_(sheet) {
   const values = sheet.getDataRange().getDisplayValues();
   if (!values.length || values[0].every(function (cell) { return clean_(cell) === ''; })) {
@@ -372,6 +405,7 @@ function readRegions_(sheet) {
     };
   });
 }
+
 /** 시트 헤더를 확인하고 사용=Y인 행만 실제 행 번호와 함께 반환합니다. */
 function readEnabledRows_(sheet, expectedHeaders) {
   const values = sheet.getDataRange().getDisplayValues();
@@ -404,9 +438,52 @@ function validateSource_(regions, targets, details, rules) {
   rules.forEach(function (rule) {
     if (!rule.type) throw new Error('rules 시트 ' + rule.rowNumber + '행의 조합유형이 비어 있습니다.');
     if (!rule.pattern) throw new Error('rules 시트 ' + rule.rowNumber + '행의 패턴이 비어 있습니다.');
+    if (rule.pattern !== TUTORING_PATTERN) throw new Error('rules 시트 ' + rule.rowNumber + '행의 패턴은 ' + TUTORING_PATTERN + '이어야 합니다.');
+  });
+  if (rules.length !== 1) throw new Error('rules 시트의 사용=Y, 대표페이지=Y인 규칙은 정확히 1개여야 합니다.');
+  const seenTargets = new Set();
+  targets.forEach(function (target) {
+    if (!Object.prototype.hasOwnProperty.call(TUTORING_TARGETS, target.name) || target.slug !== TUTORING_TARGETS[target.name]) {
+      throw new Error('target 시트 ' + target.rowNumber + '행: 활성 대상/영문주소는 초등학생/elementary, 중학생/middle, 고등학생/high만 허용합니다. 현재: ' + target.name + '/' + target.slug);
+    }
+    if (seenTargets.has(target.name)) throw new Error('target 시트 ' + target.rowNumber + '행: 중복 활성 대상 ' + target.name);
+    seenTargets.add(target.name);
+  });
+  if (seenTargets.size !== 3) throw new Error('target 시트에는 초등학생, 중학생, 고등학생이 각각 1개씩 활성화되어야 합니다.');
+  const combinations = new Map();
+  details.forEach(function (detail) {
+    validateDetailContent_(detail);
+    const key = detail.restriction + '|' + detail.name;
+    if (combinations.has(key)) throw new Error('details 중복 조합 ' + key + ': ' + combinations.get(key) + '행과 ' + detail.rowNumber + '행');
+    combinations.set(key, detail.rowNumber);
+  });
+  if (combinations.size !== 6) throw new Error('details 시트에는 초등/중등/고등 × 영어/수학 6개 조합이 각각 1개씩 활성화되어야 합니다.');
+}
+
+/** final을 지우기 전에 실제 출력의 지역별 조합과 템플릿을 재검사합니다. */
+function validateRegionCombinations_(regions, rows) {
+  const groups = new Map();
+  regions.forEach(function (region) {
+    const key = JSON.stringify([region.province, region.name]);
+    if (groups.has(key)) throw new Error('region 중복: ' + region.province + ' ' + region.name);
+    groups.set(key, new Set());
+  });
+  rows.forEach(function (row) {
+    const key = JSON.stringify([row[5], row[6]]);
+    const group = groups.get(key);
+    const expected = TUTORING_TARGETS[row[8]] + '_' + TUTORING_SUBJECTS[row[7]];
+    if (row.length !== APP.HEADERS.FINAL.length || !group || ALLOWED_TEMPLATES.indexOf(expected) === -1 || row[18] !== expected) {
+      throw new Error('final 조합 오류: region=' + row[5] + ' ' + row[6] + ', target=' + row[8] + ', detail=' + row[7] + ', template=' + row[18]);
+    }
+    if (group.has(expected)) throw new Error('final 중복 조합: ' + row[5] + ' ' + row[6] + ' / ' + expected);
+    group.add(expected);
+  });
+  groups.forEach(function (group, region) {
+    const missing = ALLOWED_TEMPLATES.filter(function (template) { return !group.has(template); });
+    if (group.size !== 6 || missing.length) throw new Error('지역별 6개 조합 오류: ' + region + ', 생성=' + group.size + ', 누락=' + missing.join(', '));
   });
 }
-/** final 내용을 모두 비운 뒤 정해진 19개 열 순서로 새 결과를 기록합니다. */
+/** final 내용을 모두 비운 뒤 기존 19개 열 순서로 새 결과를 기록합니다. */
 function rewriteFinal_(sheet, rows) {
   const neededRows = rows.length + 1;
   const neededColumns = APP.HEADERS.FINAL.length;

@@ -5,7 +5,7 @@
 ## 폴더를 쉽게 이해하기
 
 ```text
-kimsenglish/
+kimstutoring/
 ├─ pages.csv              지역별 원본 데이터
 ├─ templates/page.html    모든 페이지가 함께 쓰는 HTML 틀 1개
 ├─ assets/style.css       모든 페이지가 함께 쓰는 디자인
@@ -136,7 +136,7 @@ node preview-server.js
 3. Netlify는 자동으로 `npm run build`를 실행합니다.
 4. 생성된 `dist` 폴더만 홈페이지로 공개합니다.
 
-현재 운영 주소는 `https://kimsenglish.co.kr`입니다. 실제 상담 채널이 정해지면 `pages.csv`의 `contact_url`을 상담 주소로 바꾸세요.
+현재 운영 주소는 `https://kimstutoring.co.kr`입니다. 실제 상담 채널이 정해지면 `pages.csv`의 `contact_url`을 상담 주소로 바꾸세요.
 
 ## 왜 이렇게 바꿨나요?
 

@@ -1,0 +1,31 @@
+const assert=require('assert');
+const {loadPages,escapeHtml}=require('./generate-pages');
+const {createRelatedIndex}=require('./generate-related-index');
+const {createHubIndex}=require('./generate-hub-index');
+const {renderRelatedLessons}=require('./render-related-lessons');
+const pages=loadPages().pages, related=createRelatedIndex(pages), hubs=createHubIndex(pages);
+assert.deepStrictEqual(related,createRelatedIndex([...pages].reverse()));
+const lookup=new Map(pages.map(p=>[p.slug,p]));
+for(const page of pages){
+ const links=related[page.slug].localLessons;
+ assert.equal(links.length,5);
+ const levels=['초등학생','중학생','고등학생'];
+ const expected=pages.filter(p=>p.province===page.province&&p.region===page.region&&p.slug!==page.slug);
+ const rank=p=>p.subject===page.subject&&Math.abs(levels.indexOf(p.target)-levels.indexOf(page.target))===1?0:p.target===page.target&&p.subject!==page.subject?1:2;
+ expected.sort((a,b)=>rank(a)-rank(b)||levels.indexOf(a.target)-levels.indexOf(b.target)||a.slug.localeCompare(b.slug));
+ assert.deepStrictEqual(links,expected.map(p=>p.slug));
+ const html=renderRelatedLessons(page,lookup,related,hubs,escapeHtml);
+ assert.equal([...html.matchAll(/<a href=/g)].length,8);
+ assert(!/nofollow|onclick=/.test(html));
+}
+const page=pages[0], bad=structuredClone(related);
+bad[page.slug].localLessons[0]=page.slug;
+assert.throws(()=>renderRelatedLessons(page,lookup,bad,hubs,escapeHtml),/잘못된 관련 목적지/);
+bad[page.slug].localLessons[0]='missing-page';
+assert.throws(()=>renderRelatedLessons(page,lookup,bad,hubs,escapeHtml),/잘못된 관련 목적지/);
+bad[page.slug].localLessons[0]=pages.find(p=>p.region!==page.region).slug;
+assert.throws(()=>renderRelatedLessons(page,lookup,bad,hubs,escapeHtml),/잘못된 관련 목적지/);
+assert.throws(()=>renderRelatedLessons(page,lookup,related,{...hubs,subject:[]},escapeHtml),/허브 누락/);
+const remaining=pages.filter(p=>p.slug!==page.slug), rebuilt=createRelatedIndex(remaining);
+assert(Object.values(rebuilt).every(entry=>!entry.localLessons.includes(page.slug)));
+console.log('PASS: 996 priority/order checks, deterministic input reordering, self/missing/cross-region rejection, missing hub rejection, deletion rebuild.');

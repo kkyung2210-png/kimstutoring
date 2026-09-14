@@ -1,0 +1,105 @@
+﻿/* Detail-only layout. Homepage tokens and shared header/button rules are prepended at build time. */
+.detail-page { --detail-width:1180px; --ink:var(--he-navy); --line:var(--he-line); }
+.detail-page main { font-weight:400; }
+.detail-page main :is(h1,h2,h3,p,ul,ol,dl) { margin-top:0; }
+.detail-page main :is(h1,h2,h3) { color:var(--he-navy); font-weight:650; letter-spacing:-.045em; word-break:keep-all; overflow-wrap:anywhere; }
+.detail-page main :is(h2,h3)::before { display:none; }
+.detail-page main :is(p,li,dd) { color:var(--muted); line-height:1.85; word-break:keep-all; overflow-wrap:anywhere; }
+.detail-page main .container { width:min(calc(100% - 80px),var(--detail-width)); max-width:none; margin-inline:auto; }
+.detail-page main .section { padding-block:104px; border:0; }
+.detail-page main .section-heading { max-width:none; margin:0 0 40px; }
+.detail-page main h2 { font-size:clamp(1.8rem,2.7vw,2.65rem); line-height:1.5; margin:0 0 20px; }
+.detail-page main h3 { font-size:1.12rem; line-height:1.65; margin:0 0 14px; }
+.detail-page main :is(a,summary):focus-visible { outline:3px solid #4c8bf5; outline-offset:4px; }
+.detail-page .detail-hero { padding:48px 0 104px; background:var(--he-paper); border:0; }
+.detail-page .breadcrumb { margin:0 0 40px; font-size:.75rem; }
+.detail-page .breadcrumb ol { flex-wrap:wrap; }
+.detail-page .detail-hero-layout { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:7%; align-items:center; }
+.detail-page .detail-hero h1 { font-size:clamp(2rem,3.5vw,3.25rem); line-height:1.42; margin:0 0 26px; text-wrap:balance; }
+.detail-page .detail-hero .eyebrow { color:#46647a; font-size:.8rem; line-height:1.7; font-weight:500; letter-spacing:.04em; margin-bottom:24px; }
+.detail-page .detail-hero .lead { max-width:620px; font-size:.97rem; line-height:1.95; margin:0 0 30px; }
+.detail-page .detail-actions { display:flex; flex-wrap:wrap; align-items:center; gap:14px 26px; }
+.detail-page .detail-hero-visual { min-width:0; padding:0; background:transparent; border:0; border-radius:0; box-shadow:none; }
+.detail-page .detail-hero-visual .image-box { width:100%; height:auto; min-height:0; aspect-ratio:1.42; margin:0 0 28px; border:0; border-radius:34px 34px 6px 34px; background:var(--he-blue); box-shadow:none; transform:none; overflow:hidden; }
+.detail-page .detail-hero-visual .image-box img { display:block; width:100%; height:100%; object-fit:contain; transform:none; }
+.detail-page .detail-hero-visual h2 { font-size:1rem; font-weight:550; margin-bottom:16px; }
+.detail-page .detail-trust { list-style:none; padding:16px 0 0; margin:0; border-top:1px solid var(--he-line); display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px 20px; font-size:.82rem; }
+.detail-page .detail-problem, .detail-page .detail-student-type, .detail-page .detail-cta { background:var(--he-cream); }
+.detail-page .detail-diagnosis, .detail-page .detail-selfstudy, .detail-page .detail-mode { background:var(--he-paper); }
+.detail-page .detail-lesson, .detail-page .detail-faq { background:var(--he-blue); }
+.detail-page :is(.detail-problem,.detail-diagnosis,.detail-student-type,.detail-faq) > .container { display:grid; grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr); gap:8%; align-items:start; }
+.detail-page :is(.detail-problem,.detail-diagnosis,.detail-student-type,.detail-faq) .section-heading { margin-bottom:0; }
+.detail-page .learning-problems { list-style:none; margin:0; padding:0; counter-reset:concerns; }
+.detail-page .learning-problems li { position:relative; border-top:1px solid var(--he-line); padding:24px 0 24px 46px; counter-increment:concerns; }
+.detail-page .learning-problems li::before { content:counter(concerns,decimal-leading-zero); position:absolute; left:0; top:24px; color:#466b88; font-size:.8rem; }
+.detail-page .learning-diagnosis { list-style:none; padding:0; margin:0; }
+.detail-page .learning-diagnosis li { display:grid; grid-template-columns:34px minmax(0,1fr); gap:18px; padding:26px 0; border-top:1px solid var(--he-line); }
+.detail-page .learning-number { color:#466b88; font-size:1.5rem; line-height:1.2; font-weight:400; }
+.detail-page .learning-diagnosis p { margin:0; font-size:.95rem; }
+.detail-page .detail-lesson .section-heading { max-width:700px; }
+.detail-page .learning-actions article { display:grid; grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr); gap:8%; padding:32px 0; border-top:1px solid var(--he-line); }
+.detail-page .learning-actions h3 { padding-right:24px; position:relative; }
+.detail-page .learning-actions h3::after { content:'→'; position:absolute; right:0; top:0; color:#466b88; font-weight:400; }
+.detail-page .learning-actions p { margin:0; max-width:760px; }
+.detail-page .detail-selfstudy > .container { display:grid; grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr); gap:0 8%; align-items:start; }
+.detail-page .detail-selfstudy .section-heading { grid-column:1; margin-bottom:24px; }
+.detail-page .detail-selfstudy .learning-intro { grid-column:1; max-width:620px; }
+.detail-page .learning-coaching { grid-column:2; grid-row:1 / span 2; }
+.detail-page .learning-coaching article { padding:24px 0; border-top:1px solid var(--he-line); }
+.detail-page .learning-coaching p { margin:0; font-size:.93rem; }
+.detail-page .learning-coaching .learning-label { color:#49637a; font-size:.73rem; letter-spacing:.14em; margin-bottom:14px; font-weight:600; }
+.detail-page .learning-types { margin:0; }
+.detail-page .learning-types > div { border-top:1px solid var(--he-line); padding:24px 0; }
+.detail-page .learning-types dt { color:var(--he-navy); font-size:1.12rem; line-height:1.7; font-weight:600; margin-bottom:12px; }
+.detail-page .learning-types dd { margin:0; font-size:.95rem; }
+.detail-page .detail-mode .learning-intro { max-width:760px; margin-bottom:40px; }
+.detail-page .learning-modes { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8%; }
+.detail-page .learning-modes article { border-top:1px solid var(--he-line); padding-top:28px; }
+.detail-page .learning-modes h3 { font-size:1.5rem; }
+.detail-page .learning-modes p { margin:0; max-width:520px; }
+.detail-page .detail-faq .faq-list { display:block; margin:0; }
+.detail-page .detail-faq .faq-item { background:transparent; border:0; border-bottom:1px solid var(--he-line); border-radius:0; box-shadow:none; }
+.detail-page .detail-faq .faq-item:first-child { border-top:1px solid var(--he-line); }
+.detail-page .detail-faq summary { padding:24px 32px 24px 0; }
+.detail-page .detail-faq summary::after { right:2px; color:var(--he-navy); }
+.detail-page .detail-faq summary h3 { font-size:1rem; font-weight:550; letter-spacing:-.025em; }
+.detail-page .detail-faq .faq-answer { padding:0 24px 24px 0; font-size:.95rem; animation:none; }
+.detail-page .detail-cta-content { max-width:900px; padding:0; text-align:left; }
+.detail-page .detail-cta-content > p { max-width:700px; margin:0 0 32px; }
+.detail-page .page-cta-actions { display:flex; flex-wrap:wrap; align-items:center; gap:20px 28px; }
+.detail-page .tutoring-related { background:var(--he-paper); }
+.detail-page .tutoring-related-list { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); column-gap:48px; row-gap:0; }
+.detail-page .tutoring-related-list li { padding:20px 0; border:0; border-top:1px solid var(--he-line); border-radius:0; background:transparent; box-shadow:none; }
+.detail-page .tutoring-related-list a { display:flex; justify-content:space-between; gap:12px; text-decoration:none; }
+.detail-page .tutoring-related-list a::after { content:'↗'; flex-shrink:0; font-weight:400; }
+.detail-page .tutoring-related-list a:hover { text-decoration:underline; text-underline-offset:5px; }
+.detail-page .tutoring-hub-links { margin-top:24px; border-color:var(--he-line); }
+@media (max-width:1100px) {
+ .detail-page main .container { width:calc(100% - 48px); }
+}
+@media (max-width:900px) {
+ .detail-page .detail-hero-layout, .detail-page :is(.detail-problem,.detail-diagnosis,.detail-student-type,.detail-faq,.detail-selfstudy) > .container { grid-template-columns:minmax(0,1fr); gap:32px; }
+ .detail-page .detail-hero-visual { max-width:640px; width:100%; }
+ .detail-page .detail-selfstudy .section-heading, .detail-page .detail-selfstudy .learning-intro, .detail-page .learning-coaching { grid-column:auto; grid-row:auto; margin:0; }
+ .detail-page main .section { padding-block:88px; }
+}
+@media (max-width:600px) {
+ .detail-page main .container { width:calc(100% - 40px); }
+ .detail-page main .section { padding-block:64px; }
+ .detail-page main h2 { font-size:clamp(1.65rem,6.6vw,2rem); }
+ .detail-page main h3 { font-size:1.08rem; }
+ .detail-page .detail-hero { padding:32px 0 64px; }
+ .detail-page .breadcrumb { margin-bottom:28px; }
+ .detail-page .detail-hero h1 { font-size:clamp(1.9rem,7.6vw,2.35rem); line-height:1.45; }
+ .detail-page .detail-hero .lead { font-size:.93rem; line-height:1.85; }
+ .detail-page .detail-hero-visual .image-box { border-radius:28px 28px 4px 28px; }
+ .detail-page .detail-trust { grid-template-columns:minmax(0,1fr); }
+ .detail-page .detail-actions .he-button, .detail-page .page-cta-actions .he-button { width:100%; }
+ .detail-page .detail-actions, .detail-page .page-cta-actions { gap:16px 24px; }
+ .detail-page .learning-actions article, .detail-page .learning-modes, .detail-page .tutoring-related-list { grid-template-columns:minmax(0,1fr); gap:24px; }
+ .detail-page .learning-actions h3 { padding:0 0 28px; margin:0; }
+ .detail-page .learning-actions h3::after { content:'↓'; left:0; top:auto; bottom:-4px; }
+ .detail-page .learning-diagnosis li { grid-template-columns:28px minmax(0,1fr); gap:12px; }
+ .detail-page .detail-faq summary h3 { font-size:.93rem; }
+ .detail-page .tutoring-related-list { gap:0; }
+}

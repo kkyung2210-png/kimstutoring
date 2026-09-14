@@ -6,7 +6,8 @@ const currentPath = path.join(root, "pages.csv");
 const defaultBaselinePath = path.join(root, ".backups", "pages.backup.csv");
 const requiredColumns = ["slug", "description", "domain", "status", "language", "province", "region", "subject", "keyword", "title"];
 const templateColumns = ["template", "search_intent", "summary", "lesson_focus", "lesson_method", "lesson_result", "tone"];
-const allowedTemplates = new Set(["conversation", "exam", "business", "travel"]);
+const {TYPES, classifyTopic} = require('./content-intelligence');
+const allowedTemplates = new Set(TYPES);
 
 function parseCsv(text) {
   const rows = [];
@@ -54,7 +55,15 @@ function validate(current, baseline) {
   if (missingHeaders.length) errors.push({ type: "missing-columns", columns: missingHeaders });
   const published = current.rows.filter((row) => row.status.toLowerCase() === "publish");
   const slugLines = new Map();
+  const keywordLines = new Map();
+  const regionTypes = new Map();
   for (const row of published) {
+    try { classifyTopic(row); } catch (error) { errors.push({type:'template-contract',line:row.line,slug:row.slug,message:error.message}); }
+    const regionKey = [row.province,row.region].join('|');
+    if(!regionTypes.has(regionKey))regionTypes.set(regionKey,[]);
+    regionTypes.get(regionKey).push(row.template);
+    if(!keywordLines.has(row.keyword))keywordLines.set(row.keyword,[]);
+    keywordLines.get(row.keyword).push(row.line);
     const missing = requiredColumns.filter((column) => !row[column]);
     if (missing.length) errors.push({ type: "missing-values", line: row.line, slug: row.slug, columns: missing });
     if (row.template) {
@@ -67,6 +76,8 @@ function validate(current, baseline) {
     slugLines.get(slug).push(row.line);
   }
   for (const [slug, lines] of slugLines) if (lines.length > 1) errors.push({ type: "duplicate-slug", slug, lines });
+  for(const [keyword,lines] of keywordLines)if(lines.length>1)errors.push({type:'duplicate-keyword',keyword,lines});
+  for(const [region,types] of regionTypes)if(types.length!==TYPES.length||TYPES.some(type=>types.filter(t=>t===type).length!==1))errors.push({type:'region-combinations',region,templates:types});
 
   const oldPublished = baseline.rows.filter((row) => row.status.toLowerCase() === "publish");
   const oldBySlug = new Map(oldPublished.map((row) => [row.slug.toLowerCase(), row]));

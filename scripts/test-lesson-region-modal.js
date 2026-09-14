@@ -1,23 +1,32 @@
-"use strict";
-
-const assert = require("node:assert/strict");
-const search = require("../public/utils/lesson-region-modal");
-
-const pages = [
-  { province: "경기도", region: "안양", subject: "영어회화", slug: "anyang-english-conversation" },
-  { province: "경기도", region: "안양", subject: "토익", slug: "anyang-toeic" },
-  { province: "경기도", region: "안양", subject: "오픽", slug: "anyang-opic" },
-  { province: "대전광역시", region: "대전", subject: "일본어회화", slug: "daejeon-japanese-conversation" },
-  { province: "대전광역시", region: "대전", subject: "비즈니스영어", slug: "daejeon-business-english" },
-];
-
-assert.deepEqual(search.availableRegions(pages, "english-conversation", "안").map(function (page) { return page.region; }), ["안양"]);
-assert.deepEqual(search.availableRegions(pages, "japanese-conversation", "대").map(function (page) { return page.region; }), ["대전"]);
-assert.equal(search.findPage(pages, "business-english", pages[3]).slug, "daejeon-business-english");
-assert.deepEqual(search.examPages(pages, pages[0]), [
-  { label: "TOEIC", slug: "anyang-toeic" },
-  { label: "OPIC", slug: "anyang-opic" },
-]);
-assert.equal(search.findPage(pages, "english-conversation", pages[3]), undefined);
-
-console.log("Lesson region modal tests passed.");
+﻿const assert=require('assert');
+const {filterLessons}=require('../public/utils/lesson-region-modal');
+const pages=require('./generate-pages').loadPages().pages;
+assert.equal(filterLessons(pages,{}).length,996);
+assert.equal(filterLessons(pages,{region:'안양'}).length,6);
+assert.equal(filterLessons(pages,{target:'중학생'}).length,332);
+assert.equal(filterLessons(pages,{subject:'수학'}).length,498);
+assert.equal(filterLessons(pages,{target:'중학생',subject:'수학',region:' 안양 '})[0].slug,'anyang-middle-math');
+assert.equal(filterLessons(pages,{region:'존재하지않는지역'}).length,0);
+for(const p of pages)assert(filterLessons(pages,{region:p.region,target:p.target,subject:p.subject}).some(q=>q.slug===p.slug));
+assert.equal(filterLessons(pages,{region:'<script>alert(1)</script>'}).length,0);
+console.log('PASS: optional/partial/full filters, 996 destinations, unknown region, literal input safety.');
+// Exercise the actual browser script with a minimal DOM double; no live navigation or submission.
+const fs=require('fs'),vm=require('vm');
+const node=()=>({children:[],listeners:{},textContent:'',hidden:false,disabled:false,append(n){this.children.push(n);},replaceChildren(){this.children=[];},addEventListener(type,fn){this.listeners[type]=fn;}});
+const form=node();form.elements={region:{value:''},target:{value:''},subject:{value:''}};
+const parts=Object.fromEntries(['results','status','prev','next','page','close'].map(k=>[k,node()]));
+const dialog=node();dialog.open=false;dialog.showModal=()=>{dialog.open=true;};dialog.close=()=>{dialog.open=false;};
+dialog.querySelector=s=>parts[s.replace('[data-finder-','').replace('dialog-','').replace(']','')];
+const navigations=[];
+const window={document:{querySelector:s=>s==='[data-tutoring-finder]'?form:dialog,getElementById:()=>({textContent:JSON.stringify(pages)}),createElement:node},location:{assign:url=>navigations.push(url)}};
+vm.runInNewContext(fs.readFileSync(require.resolve('../public/utils/lesson-region-modal'),'utf8'),{window});
+const submit=()=>form.listeners.submit({preventDefault(){}});
+assert.equal(parts.results.children.length,0);assert.equal(dialog.open,false);assert(!form.listeners.input);
+form.elements.region.value='안양';submit();assert.equal(parts.results.children.length,6);assert(dialog.open);assert(parts.next.hidden);
+parts.close.listeners.click();assert(!dialog.open);
+form.elements.target.value='중학생';form.elements.subject.value='수학';submit();assert.equal(navigations.pop(),'/anyang-middle-math/');assert(!dialog.open);
+form.elements.region.value='없는지역';submit();assert(dialog.open);assert.equal(parts.results.children.length,0);assert(parts.status.textContent.includes('없습니다'));
+form.elements.region.value='';form.elements.target.value='';form.elements.subject.value='';submit();assert.equal(parts.results.children.length,12);assert.equal(parts.page.textContent,'1 / 83');
+const first=parts.results.children[0].children[0].href;parts.next.listeners.click();assert.equal(parts.page.textContent,'2 / 83');assert.notEqual(parts.results.children[0].children[0].href,first);parts.prev.listeners.click();assert.equal(parts.results.children[0].children[0].href,first);
+form.listeners.reset();assert.equal(parts.results.children.length,0);assert(!dialog.open);
+console.log('PASS: no initial results, submit-only dialog, single-result navigation, no-match, pagination, close/reset.');

@@ -1,14 +1,142 @@
 {
-  "templates": [
-    {"topics":["all"],"title":"{{region}} {{service}} 수업, 내 상황에도 맞을까요?","text":"현재 실력과 배우려는 이유를 말씀해 주시면 어떤 수업이 맞는지 함께 이야기해 드립니다.","label":"수업 상담 신청"},
-    {"topics":["all"],"title":"{{service}}를 어디서부터 시작할지 고민되시나요?","text":"막히는 부분과 가능한 수업 시간을 남겨 주세요. 첫 수업에서 다룰 내용까지 구체적으로 말씀드립니다.","label":"무료 수업 문의"},
-    {"topics":["all"],"title":"{{keyword}} 수업이 궁금하신가요?","text":"배우려는 이유와 요즘 가장 어려운 점을 들은 뒤 맞는 수업 방식을 같이 찾아드립니다.","label":"상담 예약"},
-    {"topics":["all"],"title":"지금 실력에서 시작할 수 있는 수업이 있습니다","text":"진도나 교재보다 현재 필요한 내용을 먼저 정합니다. 상담에서 편하게 말씀해 주세요.","label":"맞춤 상담 받기"},
-    {"topics":["conversation"],"title":"{{region}} {{service}} 말하기를 편하게 시작하세요","text":"말하기가 막히는 상황과 원하는 활용 장면을 알려주시면 연습 방향을 함께 찾습니다.","label":"회화 수업 문의"},
-    {"topics":["exam"],"title":"{{service}} 준비 계획을 점검해 보세요","text":"현재 준비 상태와 목표를 기준으로 우선 학습 영역을 확인합니다.","label":"레벨 테스트 문의"},
-    {"topics":["toeic","opic","ielts"],"title":"{{service}} 점수, 공부 방법부터 다시 봐야 할까요?","text":"시험일과 최근 점수, 어려운 영역을 남겨 주시면 남은 기간에 맞는 공부 순서를 함께 잡아드립니다.","label":"시험 상담 신청"},
-    {"topics":["business"],"title":"업무에 바로 필요한 {{service}}를 준비하세요","text":"자주 사용하는 업무 장면을 알려주시면 우선 연습할 표현과 진행 방법을 확인합니다.","label":"비즈니스 수업 문의"},
-    {"topics":["travel"],"title":"이번 여행에서 꼭 쓰게 될 말부터 준비하세요","text":"여행 일정과 걱정되는 상황을 알려주시면 출국 전 연습할 표현을 골라드립니다.","label":"여행 회화 상담"},
-    {"topics":["all"],"title":"{{region}} {{subject}} 수업에 대해 직접 물어보세요","text":"원하는 수업과 현재 상황을 남겨 주시면 실제 수업 방식과 시작 시기를 솔직하게 말씀드립니다.","label":"수업 방향 상담"}
-  ]
+  "templates": {
+    "elementary_english": [
+      {
+        "topics": [
+          "english_basics",
+          "study_habits"
+        ],
+        "title": "{{region}} {{target_short}} {{subject}}, 필요한 학습부터 상담하세요",
+        "text": "{{concern}} 현재 교재와 도움이 필요한 부분을 알려주시면 학습 순서를 함께 검토합니다. {{availability}}",
+        "label": "1:1 맞춤과외 상담하기"
+      },
+      {
+        "topics": [
+          "english_basics",
+          "study_habits"
+        ],
+        "title": "{{target}}에게 맞는 {{subject}} 학습 계획을 함께 확인해 보세요",
+        "text": "기초 어휘·문장 이해·읽기·기초 문법 중 도움이 필요한 부분을 상담에서 말씀해 주세요. {{availability}}",
+        "label": "수업 방식과 일정 문의"
+      }
+    ],
+    "middle_english": [
+      {
+        "topics": [
+          "english_basics",
+          "english_reading",
+          "school_assessment",
+          "study_habits"
+        ],
+        "title": "{{region}} {{target_short}} {{subject}}, 필요한 학습부터 상담하세요",
+        "text": "{{concern}} 현재 교재와 도움이 필요한 부분을 알려주시면 학습 순서를 함께 검토합니다. {{availability}}",
+        "label": "1:1 맞춤과외 상담하기"
+      },
+      {
+        "topics": [
+          "english_basics",
+          "english_reading",
+          "school_assessment",
+          "study_habits"
+        ],
+        "title": "{{target}}에게 맞는 {{subject}} 학습 계획을 함께 확인해 보세요",
+        "text": "어휘·문법·독해·학교별 내신·서술형·수행평가 중 도움이 필요한 부분을 상담에서 말씀해 주세요. {{availability}}",
+        "label": "수업 방식과 일정 문의"
+      }
+    ],
+    "high_english": [
+      {
+        "topics": [
+          "english_basics",
+          "english_reading",
+          "school_assessment",
+          "college_exam",
+          "study_habits"
+        ],
+        "title": "{{region}} {{target_short}} {{subject}}, 필요한 학습부터 상담하세요",
+        "text": "{{concern}} 현재 교재와 도움이 필요한 부분을 알려주시면 학습 순서를 함께 검토합니다. {{availability}}",
+        "label": "1:1 맞춤과외 상담하기"
+      },
+      {
+        "topics": [
+          "english_basics",
+          "english_reading",
+          "school_assessment",
+          "college_exam",
+          "study_habits"
+        ],
+        "title": "{{target}}에게 맞는 {{subject}} 학습 계획을 함께 확인해 보세요",
+        "text": "어휘·구문독해·내신·모의고사·수능·지문 분석 중 도움이 필요한 부분을 상담에서 말씀해 주세요. {{availability}}",
+        "label": "수업 방식과 일정 문의"
+      }
+    ],
+    "elementary_math": [
+      {
+        "topics": [
+          "math_arithmetic",
+          "math_concepts",
+          "study_habits"
+        ],
+        "title": "{{region}} {{target_short}} {{subject}}, 필요한 학습부터 상담하세요",
+        "text": "{{concern}} 현재 교재와 도움이 필요한 부분을 알려주시면 학습 순서를 함께 검토합니다. {{availability}}",
+        "label": "1:1 맞춤과외 상담하기"
+      },
+      {
+        "topics": [
+          "math_arithmetic",
+          "math_concepts",
+          "study_habits"
+        ],
+        "title": "{{target}}에게 맞는 {{subject}} 학습 계획을 함께 확인해 보세요",
+        "text": "연산·기초개념·문제 이해·풀이 순서·계산 실수 중 도움이 필요한 부분을 상담에서 말씀해 주세요. {{availability}}",
+        "label": "수업 방식과 일정 문의"
+      }
+    ],
+    "middle_math": [
+      {
+        "topics": [
+          "math_concepts",
+          "school_assessment",
+          "study_habits"
+        ],
+        "title": "{{region}} {{target_short}} {{subject}}, 필요한 학습부터 상담하세요",
+        "text": "{{concern}} 현재 교재와 도움이 필요한 부분을 알려주시면 학습 순서를 함께 검토합니다. {{availability}}",
+        "label": "1:1 맞춤과외 상담하기"
+      },
+      {
+        "topics": [
+          "math_concepts",
+          "school_assessment",
+          "study_habits"
+        ],
+        "title": "{{target}}에게 맞는 {{subject}} 학습 계획을 함께 확인해 보세요",
+        "text": "개념·유형별 문제풀이·내신·서술형·취약단원·오답관리 중 도움이 필요한 부분을 상담에서 말씀해 주세요. {{availability}}",
+        "label": "수업 방식과 일정 문의"
+      }
+    ],
+    "high_math": [
+      {
+        "topics": [
+          "math_concepts",
+          "school_assessment",
+          "college_exam",
+          "study_habits"
+        ],
+        "title": "{{region}} {{target_short}} {{subject}}, 필요한 학습부터 상담하세요",
+        "text": "{{concern}} 현재 교재와 도움이 필요한 부분을 알려주시면 학습 순서를 함께 검토합니다. {{availability}}",
+        "label": "1:1 맞춤과외 상담하기"
+      },
+      {
+        "topics": [
+          "math_concepts",
+          "school_assessment",
+          "college_exam",
+          "study_habits"
+        ],
+        "title": "{{target}}에게 맞는 {{subject}} 학습 계획을 함께 확인해 보세요",
+        "text": "개념·유형별 문제풀이·내신·모의고사·수능·취약단원·오답분석 중 도움이 필요한 부분을 상담에서 말씀해 주세요. {{availability}}",
+        "label": "수업 방식과 일정 문의"
+      }
+    ]
+  }
 }

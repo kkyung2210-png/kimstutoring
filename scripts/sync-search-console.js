@@ -7,12 +7,12 @@ const { readCache, writeCache } = require('../services/search-console/cache');
 const { mapSearchConsoleData } = require('../services/search-console/mapper');
 
 function loadConfig(rootDir) {
-  return JSON.parse(
+  return { ...JSON.parse(
     fs.readFileSync(
       path.join(rootDir, 'config', 'search-console.config.json'),
       'utf8'
     )
-  );
+  ), siteUrl: require('../config/site').SITE_URL + '/' };
 }
 
 function writeJson(file, value) {

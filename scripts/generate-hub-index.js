@@ -73,12 +73,13 @@ function makeGroups(pages, type, valueOf, extraOf = () => ({}), slugOf = (group)
 
 /** 새 콘텐츠 유형도 같은 방식으로 Hub 묶음을 추가할 수 있는 공통 색인입니다. */
 function createHubIndex(pages) {
+  for(const page of pages)require('./content-intelligence').classifyTopic(page);
   const hubIndex = {
     province: makeGroups(pages, "province", (page) => page.province),
     region: makeGroups(pages, "region", (page) => `${page.province}|${page.region}`, (page) => ({ province: page.province, region: page.region }), (group) => commonRegionSlug(group.pages)),
     subject: makeGroups(pages, "subject", (page) => page.subject),
     target: makeGroups(pages, "target", (page) => page.target),
-    intent: makeGroups(pages, "intent", (page) => page.searchIntent),
+    intent: [],
     exam: makeGroups(pages.filter((page) => page.contentTemplate === "exam"), "subject", (page) => page.subject),
   };
   for (const type of ["province", "region", "subject", "target"]) {

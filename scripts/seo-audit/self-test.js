@@ -6,7 +6,7 @@ const { discoverHtmlFiles, parseDocument } = require("./validators");
 const root = path.resolve(__dirname, "..", "..");
 const source = path.join(root, "dist");
 const fixture = path.join(root, ".audit-test-fixture");
-const slugs = ["anyang-english-conversation", "suwon-english-conversation", "busan-japanese-conversation", "gangneung-toeic", "dongducheon-english-conversation"];
+const slugs = require('../generate-pages').loadPages().pages.slice(0,5).map(page=>page.slug);
 
 function transform(slug, callback) {
   const filePath = path.join(fixture, slug, "index.html");
@@ -14,6 +14,7 @@ function transform(slug, callback) {
 }
 
 async function runSelfTest() {
+  if (!fixture.startsWith(root + path.sep) || (fs.existsSync(fixture) && fs.lstatSync(fixture).isSymbolicLink())) throw new Error('Unsafe audit fixture path');
   fs.rmSync(fixture, { recursive: true, force: true });
   fs.mkdirSync(fixture, { recursive: true });
   try {
@@ -25,7 +26,8 @@ async function runSelfTest() {
     transform(slugs[2], (html) => html.replace(/<meta name="description"[^>]*>\s*/i, ""));
     transform(slugs[3], (html) => html.replace("</main>", '<a href="/missing-audit-page/">잘못된 테스트 링크</a></main>'));
     transform(slugs[4], (html) => html.replace("</main>", '<img src="data:image/svg+xml,%3Csvg/%3E" alt="" width="10" height="10"><p>{{region}}</p></main>').replace(/<h1([^>]*)>([\s\S]*?)<\/h1>/, '<h1$1>$2</h1><h1>중복 H1 테스트</h1>'));
-    transform(slugs[0], (html) => html.replace(/<link rel="canonical" href="[^"]+">/, '<link rel="canonical" href="https://kimsenglish.co.kr/wrong-canonical/">'));
+    const baseUrl = require('../generate-pages').loadPages().baseUrl;
+    transform(slugs[0], (html) => html.replace(/<link rel="canonical" href="[^"]+">/, `<link rel="canonical" href="${baseUrl}/wrong-canonical/">`));
 
     const orphan = "orphan-audit-test";
     fs.cpSync(path.join(source, slugs[0]), path.join(fixture, orphan), { recursive: true });
@@ -36,7 +38,6 @@ async function runSelfTest() {
     fs.writeFileSync(path.join(fixture, "search-index.json"), JSON.stringify(regular.map((document) => ({ slug: document.slug, title: document.title, keyword: document.title, province: "테스트도", region: "테스트", subject: "테스트", target: "" }))), "utf8");
     fs.writeFileSync(path.join(fixture, "related-index.json"), JSON.stringify(Object.fromEntries(regular.map((document) => [document.slug, { sameRegion: [], sameProvince: [], sameSubject: [], sameTarget: [], sameIntent: [], popularRelated: [] }]))), "utf8");
     fs.writeFileSync(path.join(fixture, "hub-index.json"), JSON.stringify({ province: [], region: [], subject: [], target: [], intent: [], exam: [] }), "utf8");
-    const baseUrl = "https://kimsenglish.co.kr";
     fs.writeFileSync(path.join(fixture, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${documents.map((document) => `<url><loc>${baseUrl}${document.urlPath}</loc></url>`).join("")}</urlset>`, "utf8");
     fs.writeFileSync(path.join(fixture, "robots.txt"), `User-agent: *\nAllow: /\nSitemap: ${baseUrl}/sitemap.xml\n`, "utf8");
 

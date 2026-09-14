@@ -2,13 +2,14 @@
  * 사이트 전체에서 사용하는 브랜드 이미지 설정입니다.
  * 실제 파일이 public/assets 아래에 있으면 사용하고, 없으면 placeholder를 사용합니다.
  */
+const brand = require("./brand");
 module.exports = Object.freeze({
-  name: "Kim's English",
+  name: brand.name,
   maximumBytes: 2 * 1024 * 1024,
   largeRasterWarningBytes: 500 * 1024,
   logo: Object.freeze({
-    default: { src: "/assets/logo/logo.svg", placeholder: "/images/brand/logo-placeholder.svg", alt: "Kim's English", width: 176, height: 48 },
-    dark: { src: "/assets/logo/logo-dark.svg", placeholder: "/images/brand/logo-placeholder.svg", alt: "Kim's English", width: 176, height: 48 },
+    default: { src: "/assets/logo/logo.svg", placeholder: "/images/brand/logo-placeholder.svg", alt: brand.englishName, width: 176, height: 48 },
+    dark: { src: "/assets/logo/logo-dark.svg", placeholder: "/images/brand/logo-placeholder.svg", alt: brand.englishName, width: 176, height: 48 },
     mark: { src: "/assets/logo/logo-mark.svg", placeholder: "/images/brand/logo-placeholder.svg", alt: "", width: 44, height: 44, decorative: true },
   }),
   hero: Object.freeze({
@@ -65,7 +66,7 @@ module.exports = Object.freeze({
     arrow: { src: "/assets/icons/arrow.svg", alt: "", width: 24, height: 24, decorative: true },
   }),
   og: Object.freeze({
-    default: { src: "/assets/og/default-og.webp", placeholder: "/images/hero/hero-placeholder.svg", alt: "Kim's English 맞춤 수업 안내", width: 1200, height: 630 },
+    default: { src: "/assets/og/default-og.webp", placeholder: "/images/hero/hero-placeholder.svg", alt: brand.name + " 맞춤 수업 안내", width: 1200, height: 630 },
   }),
   favicon: Object.freeze({
     ico: { src: "/assets/logo/favicon.ico", placeholder: "/images/brand/favicon.ico" },
