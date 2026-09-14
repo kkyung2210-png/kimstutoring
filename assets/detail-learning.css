@@ -22,6 +22,14 @@
 .detail-page .detail-hero-visual { min-width:0; padding:0; background:transparent; border:0; border-radius:0; box-shadow:none; }
 .detail-page .detail-hero-visual .image-box { width:100%; height:auto; min-height:0; aspect-ratio:1.42; margin:0 0 28px; border:0; border-radius:34px 34px 6px 34px; background:var(--he-blue); box-shadow:none; transform:none; overflow:hidden; }
 .detail-page .detail-hero-visual .image-box img { display:block; width:100%; height:100%; object-fit:contain; transform:none; }
+.detail-page .detail-hero-visual .detail-photo img { object-fit:cover; object-position:var(--photo-position,50% 50%); }
+.detail-page .detail-photo-fallback { display:grid; place-items:center; width:100%; height:100%; color:var(--muted); }
+.detail-page .detail-photo-elementary-english { --photo-position:50% 50%; }
+.detail-page .detail-photo-elementary-math { --photo-position:50% 50%; }
+.detail-page .detail-photo-middle-english { --photo-position:50% 50%; }
+.detail-page .detail-photo-middle-math { --photo-position:50% 50%; }
+.detail-page .detail-photo-high-english { --photo-position:50% 50%; }
+.detail-page .detail-photo-high-math { --photo-position:50% 50%; }
 .detail-page .detail-hero-visual h2 { font-size:1rem; font-weight:550; margin-bottom:16px; }
 .detail-page .detail-trust { list-style:none; padding:16px 0 0; margin:0; border-top:1px solid var(--he-line); display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px 20px; font-size:.82rem; }
 .detail-page .detail-problem, .detail-page .detail-student-type, .detail-page .detail-cta { background:var(--he-cream); }

@@ -304,9 +304,7 @@ for (const [index, page] of selectedPages.entries()) {
   const structuredData = makePageSchema({ canonicalUrl, page, locationName, context, baseUrl, faqs, breadcrumbItems });
   const contactUrl = "/#consultation";
   const eyebrow = [page.province, page.region, page.target || "전체 대상", categoryName].filter(Boolean).map(escapeHtml).join(" · ");
-  const pageAsset = resolvePageAsset(page, root);
-  const pageAssetAlt = `${page.region} ${page.subject} 맞춤 수업 안내`;
-  const pageMedia = renderImageBox(pageAsset, `page-hero-media asset-${pageAsset.key}`, { alt: pageAssetAlt });
+  const pageMedia = require('./detail-hero-image').renderDetailHeroImage(page,root);
   const consultationLabel = pageConsultationLabel(page);
   const main = `<section class="detail-hero"><div class="container"><nav class="breadcrumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li>${breadcrumbMiddle}<li aria-current="page">${escapeHtml(page.title)}</li></ol></nav><div class="detail-hero-layout"><div><p class="eyebrow">1:1 맞춤과외 · ${eyebrow}</p><h1>${escapeHtml(page.h1)}</h1><p class="lead">${escapeHtml(page.intelligence.learning.hero)}</p><div class="detail-actions"><a class="button" href="${contactUrl}">${consultationLabel}</a><a class="button button-secondary" href="#process">수업 진행 방법 보기</a></div></div><aside class="detail-hero-visual" aria-label="수업 신뢰 정보">${pageMedia}<h2>${escapeHtml(page.region)} ${escapeHtml(context.service)} 수업 전 확인할 내용</h2><ul class="detail-trust"><li>학생별 1:1 학습 지도</li><li>현재 수준에 맞춘 수업</li><li>학습 목표와 취약 내용 점검</li><li>방문·화상 가능 방식은 상담 후 안내</li></ul></aside></div></div></section>
   ${require('./render-detail-learning').renderLearningSections(page,escapeHtml)}

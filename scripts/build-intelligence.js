@@ -76,7 +76,7 @@ function makeFingerprints(root) {
   return {
     pageTemplate: fingerprint(root, [
       "templates/page.html", "scripts/generate-pages.js", "scripts/generate-schema.js",
-      "scripts/detail-design-system.js", "scripts/render-editorial-header.js", "scripts/problem-learning.js", "scripts/render-detail-learning.js", "assets/detail-learning.css",
+      "scripts/detail-hero-image.js", "scripts/detail-design-system.js", "scripts/render-editorial-header.js", "scripts/problem-learning.js", "scripts/render-detail-learning.js", "assets/detail-learning.css",
       "scripts/content-intelligence.js", "scripts/generate-hub-pages.js", "scripts/utils/assets",
       "scripts/render-related-lessons.js", "scripts/generate-related-index.js", "scripts/generate-hub-index.js",
       "scripts/generate-home-page.js", "config/tutoring-navigation.js", "templates/consultation.html",
