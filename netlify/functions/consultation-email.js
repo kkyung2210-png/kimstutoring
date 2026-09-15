@@ -9,7 +9,6 @@ const ALLOWED_ORIGIN = { test(value) {
   try { const url = new URL(value); return url.protocol === 'https:' && [siteHost, 'www.' + siteHost].includes(url.hostname) && !url.port && !url.username && !url.password && url.pathname === '/' && !url.search && !url.hash; }
   catch { return false; }
 } };
-const PREVIEW_ORIGIN = /^https:\/\/[a-z0-9-]+\.netlify\.app$/i;
 const LOCAL_ORIGIN = /^http:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i;
 
 function jsonResponse(statusCode, body) {
@@ -38,7 +37,32 @@ function escapeHtml(value) {
 }
 
 function isAllowedOrigin(origin) {
-  return !origin || ALLOWED_ORIGIN.test(origin) || PREVIEW_ORIGIN.test(origin) || LOCAL_ORIGIN.test(origin);
+  // Relative frontend requests are same-origin; no wildcard CORS policy is needed.
+  // URL and SITE_NAME are available at Function runtime (build-only deploy variables are not).
+  const siteName = process.env.SITE_NAME || '';
+  const siteDeployOrigins = [process.env.URL || '', /^[a-z0-9-]+$/i.test(siteName) ? `https://${siteName}.netlify.app` : '']
+    .filter(value => /^https:\/\/[a-z0-9-]+\.netlify\.app\/?$/i.test(value))
+    .map(value => new URL(value).origin);
+  const localDevelopment = !process.env.SITE_ID && !process.env.AWS_LAMBDA_FUNCTION_NAME && process.env.NETLIFY !== 'true' && process.env.CONTEXT !== 'production';
+  return !origin || ALLOWED_ORIGIN.test(origin) || siteDeployOrigins.includes(origin) || (localDevelopment && LOCAL_ORIGIN.test(origin));
+}
+
+function logFailure(code, details = {}) {
+  // Deliberately omit payloads, addresses, headers, API keys and raw provider messages.
+  console.error(JSON.stringify({ event: 'consultation_email_failed', code, ...details }));
+}
+
+async function providerErrorDetails(response) {
+  const known = new Set(['validation_error', 'missing_api_key', 'invalid_api_key', 'restricted_api_key', 'rate_limit_exceeded', 'daily_quota_exceeded', 'monthly_quota_exceeded', 'application_error', 'internal_server_error', 'invalid_access']);
+  try {
+    const data = JSON.parse(await response.text());
+    const message = String(data.message || '').toLowerCase();
+    const reason = /domain.*(?:not verified|verify)|verify.*domain/.test(message) ? 'sender_domain_not_verified'
+      : /testing emails|own email address/.test(message) ? 'test_sender_recipient_restriction'
+      : /api key.*(?:invalid|missing|restricted)/.test(message) ? 'api_key_configuration'
+      : 'check_resend_dashboard';
+    return { providerError: known.has(data.name) ? data.name : 'unclassified', reason };
+  } catch { return { providerError: 'unreadable_response', reason: 'check_resend_dashboard' }; }
 }
 
 function readPayload(event) {
@@ -104,19 +128,25 @@ async function handler(event) {
   if (event.httpMethod !== "POST") return jsonResponse(405, { message: "허용되지 않은 요청입니다." });
 
   const origin = (event.headers || {}).origin || "";
-  if (!isAllowedOrigin(origin)) return jsonResponse(403, { message: "허용되지 않은 출처입니다." });
+  if (!isAllowedOrigin(origin)) {
+    logFailure('origin_rejected');
+    return jsonResponse(403, { message: "허용되지 않은 출처입니다." });
+  }
 
   const payload = readPayload(event);
   if (payload && clean(payload.botField, 200)) return jsonResponse(200, { ok: true });
 
   const validationError = validate(payload);
-  if (validationError) return jsonResponse(400, { message: validationError });
+  if (validationError) {
+    logFailure('validation_failed');
+    return jsonResponse(400, { message: validationError });
+  }
 
   const apiKey = clean(process.env.RESEND_API_KEY, 500);
   const contactEmail = clean(process.env.CONTACT_EMAIL, 320);
   const fromEmail = clean(process.env.CONTACT_FROM_EMAIL, 320);
   if (!apiKey || !contactEmail || !fromEmail) {
-    console.error("Consultation email environment variables are missing.");
+    logFailure('configuration_missing', { missing: Object.entries({ RESEND_API_KEY: apiKey, CONTACT_EMAIL: contactEmail, CONTACT_FROM_EMAIL: fromEmail }).filter(([, value]) => !value).map(([name]) => name) });
     return jsonResponse(503, { message: "메일 전송 설정이 완료되지 않았습니다." });
   }
 
@@ -138,12 +168,12 @@ async function handler(event) {
     });
 
     if (!result.ok) {
-      console.error("Resend rejected consultation email:", result.status, await result.text());
+      logFailure('resend_rejected', { status: result.status, ...await providerErrorDetails(result) });
       return jsonResponse(502, { message: "메일을 전송하지 못했습니다." });
     }
     return jsonResponse(200, { ok: true });
   } catch (error) {
-    console.error("Consultation email request failed:", error);
+    logFailure('resend_network_error', { errorType: ['TypeError', 'AbortError', 'TimeoutError'].includes(error?.name) ? error.name : 'Error' });
     return jsonResponse(502, { message: "메일을 전송하지 못했습니다." });
   }
 }
