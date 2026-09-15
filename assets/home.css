@@ -1,4 +1,10 @@
 /* Homepage only: never imported by detail or hub pages. */
+.home-editorial .he-header-phone { display:inline-flex; align-items:center; justify-content:center; min-height:44px; flex-shrink:0; font-size:.85rem; text-decoration:none; color:var(--he-navy); }
+.home-editorial .he-header-phone:hover { text-decoration:underline; text-underline-offset:5px; }
+.home-editorial .he-phone-secondary { display:inline-flex; align-items:center; justify-content:center; min-height:52px; padding:13px 24px; border:1px solid var(--he-navy); border-radius:5px; color:var(--he-navy); background:transparent; text-decoration:none; font-weight:600; }
+.home-editorial .he-phone-secondary:hover { background:var(--he-cream); }
+.home-editorial .he-consult-phone { margin-top:24px; font-size:.95rem; }
+.home-editorial .he-consult-phone a { display:inline-block; padding:10px 0; color:var(--he-navy); text-underline-offset:4px; }
 .home-editorial {
   --he-navy: #102a43;
   --he-paper: #fafaf7;

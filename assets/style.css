@@ -805,3 +805,12 @@ p { margin-top: 0; }
   * { transition: none !important; }
   .reveal { opacity: 1; transform: none; }
 }
+
+/* Shared phone/application bar; equal actions with safe-area space on mobile. */
+@media (max-width: 767px) {
+  body { padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px)); }
+  .mobile-contact-bar { left: 0; right: 0; bottom: 0; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; padding: 8px 16px calc(8px + env(safe-area-inset-bottom, 0px)); border: 0; border-top: 1px solid #d3dce0; border-radius: 0; box-shadow: none; background: #fafaf7; }
+  .mobile-contact-bar a { min-height: 48px; border-radius: 5px; font-size: .9rem; font-weight: 600; }
+  .mobile-contact-bar .mobile-phone { color: #102a43; background: transparent; border: 1px solid #102a43; }
+  .mobile-contact-bar .mobile-consult { color: #fff; background: #102a43; }
+}

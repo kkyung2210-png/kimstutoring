@@ -55,11 +55,12 @@ function generateHomePage({ root, outputPath, data, hubIndex }) {
   const consultation = fs.readFileSync(path.join(root, 'templates/consultation.html'), 'utf8')
     .replace('나에게 맞는 수업,<br>무료 상담으로 시작해보세요.', '어디서부터 공부해야 할지<br>고민이라면')
     .replace('희망하는 수업과 현재 고민을 남겨주시면<br>확인 후 순차적으로 연락드리겠습니다.', '현재 학습 상황과 어려운 부분을 알려주세요.<br>학생에게 필요한 학습 방향과 수업 방법을 함께 상담합니다.')
+    .replace('</div><form', `<p class="he-consult-phone">전화 상담 <a href="${e(brand.phoneHref)}">${e(brand.phone)}</a></p></div><form`)
     .replace('무료 상담 신청하기</button>', '무료 상담 신청 <span aria-hidden="true">→</span></button>')
     .replace(/(<select id="consultation-lesson"[^>]*>)[\s\S]*?<\/select>/, (_, start) => start + '<option value="">희망 수업을 선택해 주세요</option>' + lessonOptions + '</select>');
   const main = `
   <section class="he-hero"><div class="he-wrap he-hero-grid">
-    <div class="he-hero-copy"><p class="he-eyebrow">학생마다 다른 공부,<br>수업도 달라야 하니까</p><h1>초등부터 고등까지<br>1:1 맞춤과외</h1><p class="he-lead">${e(subjectNames)} 기초부터 학교별 내신과 시험 대비까지,<br>학생의 현재 실력과 학습 목표에 맞춰<br>1:1 맞춤수업을 진행합니다.</p><div class="he-actions"><a class="he-button" href="#consultation">무료 상담 신청 <span aria-hidden="true">→</span></a><a class="he-text-link" href="#lessons">맞춤 수업 찾기 ${arrow}</a></div></div>
+    <div class="he-hero-copy"><p class="he-eyebrow">학생마다 다른 공부,<br>수업도 달라야 하니까</p><h1>초등부터 고등까지<br>1:1 맞춤과외</h1><p class="he-lead">${e(subjectNames)} 기초부터 학교별 내신과 시험 대비까지,<br>학생의 현재 실력과 학습 목표에 맞춰<br>1:1 맞춤수업을 진행합니다.</p><div class="he-actions"><a class="he-button" href="#consultation">무료 상담 신청 <span aria-hidden="true">→</span></a><a class="he-phone-secondary" href="${e(brand.phoneHref)}">전화 상담</a><a class="he-text-link" href="#lessons">맞춤 수업 찾기 ${arrow}</a></div></div>
     <figure class="he-hero-figure">${renderPicture({ desktop: hero.desktop, mobile: hero.mobile, className: 'he-hero-photo', alt: '학생과 선생님의 1:1 맞춤과외 수업' })}<figcaption><span>나의 속도로, 나의 가능성으로.</span><span>Kim's Tutoring</span></figcaption></figure>
   </div><ol class="he-wrap he-principles"><li><span>01</span><p>학생별 학습 설계</p></li><li><span>02</span><p>1:1 맞춤수업</p></li><li><span>03</span><p>학습 과정 관리</p></li></ol></section>
   <section class="he-section he-cream" id="grades"><div class="he-wrap"><div class="he-heading"><p class="he-label">LEARNING STAGES</p><h2>학년별 수업</h2><p>초등부터 고등까지 학년과 학습 목표에 맞춘 1:1 수업을 살펴보세요.</p></div><div class="he-grade-lessons">${grades}</div></div></section>

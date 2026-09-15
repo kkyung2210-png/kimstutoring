@@ -82,6 +82,8 @@ function brandTemplateValues(page = null, baseUrl = productionUrl) {
   ].filter(Boolean).join("\n  ");
   return {
     BRAND_NAME: brandAssets.name,
+    PHONE_NUMBER: require('../config/brand').phone,
+    PHONE_HREF: require('../config/brand').phoneHref,
     BRAND_ENGLISH_NAME: require('../config/brand').englishName,
     COPYRIGHT_YEAR: String(new Date().getFullYear()),
     BRAND_LOGO_MARK: renderLogo(resolveLogoAsset("mark", root)),
@@ -309,7 +311,7 @@ for (const [index, page] of selectedPages.entries()) {
   const main = `<section class="detail-hero"><div class="container"><nav class="breadcrumb" aria-label="현재 위치"><ol><li><a href="/">홈</a></li>${breadcrumbMiddle}<li aria-current="page">${escapeHtml(page.title)}</li></ol></nav><div class="detail-hero-layout"><div><p class="eyebrow">1:1 맞춤과외 · ${eyebrow}</p><h1>${escapeHtml(page.h1)}</h1><p class="lead">${escapeHtml(page.intelligence.learning.hero)}</p><div class="detail-actions"><a class="button" href="${contactUrl}">${consultationLabel}</a><a class="button button-secondary" href="#process">수업 진행 방법 보기</a></div></div><aside class="detail-hero-visual" aria-label="수업 신뢰 정보">${pageMedia}<h2>${escapeHtml(page.region)} ${escapeHtml(context.service)} 수업 전 확인할 내용</h2><ul class="detail-trust"><li>학생별 1:1 학습 지도</li><li>현재 수준에 맞춘 수업</li><li>학습 목표와 취약 내용 점검</li><li>방문·화상 가능 방식은 상담 후 안내</li></ul></aside></div></div></section>
   ${require('./render-detail-learning').renderLearningSections(page,escapeHtml)}
   <section class="section detail-faq" id="faq"><div class="container"><div class="section-heading"><p class="section-kicker">자주 묻는 질문</p><h2>${escapeHtml(page.region)} ${escapeHtml(context.service)} 수업 전 자주 묻는 질문</h2></div><div class="faq-list">${faqHtml}</div>${page.updated_at ? `<p class="updated">마지막 내용 확인: ${escapeHtml(page.updated_at)}</p>` : ""}</div></section>
-  <section class="section detail-cta" id="consultation"><div class="container"><div class="detail-cta-content"><h2>${escapeHtml(firstValue(page, "cta_title") || page.intelligence.cta.title)}</h2><p>${escapeHtml(page.intelligence.cta.text)}</p><div class="page-cta-actions"><a class="button" href="${contactUrl}">${consultationLabel}</a><a class="button button-kakao" href="https://open.kakao.com/o/strVhSJi" target="_blank" rel="noopener noreferrer">카톡으로 수업 문의</a><a class="button button-secondary" href="tel:01025686630">전화로 수업 문의</a></div></div></div></section>
+  <section class="section detail-cta" id="consultation"><div class="container"><div class="detail-cta-content"><h2>${escapeHtml(firstValue(page, "cta_title") || page.intelligence.cta.title)}</h2><p>${escapeHtml(page.intelligence.cta.text)}</p><div class="page-cta-actions"><a class="button" href="${contactUrl}">${consultationLabel}</a><a class="button button-kakao" href="https://open.kakao.com/o/strVhSJi" target="_blank" rel="noopener noreferrer">카톡으로 수업 문의</a><a class="button button-secondary" href="${escapeHtml(require('../config/brand').phoneHref)}">전화로 수업 문의</a></div></div></div></section>
   `;
   const detailTemplate = template.replace('맞춤 회화 과외','초·중·고 맞춤 과외').replace('영어 · 일본어 · TOEIC · OPIC · IELTS','초등 · 중등 · 고등 영어·수학');
   validateText(page.template,main.replace(/<[^>]*>/g,' '),page.slug+'/rendered main');

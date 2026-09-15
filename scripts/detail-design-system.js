@@ -5,7 +5,7 @@ function sharedEditorialCss(root) {
  const source=fs.readFileSync(path.join(root,'assets/home.css'),'utf8').replace(/\/\*[\s\S]*?\*\//g,'');
  const rootRule=source.match(/\.home-editorial\s*\{([^}]*)\}/);
  if(!rootRule)throw Error('Homepage design tokens missing');
- const isShared=selector=>/^\.home-editorial\s+\.(?:he-wrap|he-header(?:-cta)?|he-nav|he-brand|he-desktop-nav|he-mobile-menu|he-button|he-text-link|site-footer)(?:\b|\s|:|\[)/.test(selector);
+ const isShared=selector=>/^\.home-editorial\s+\.(?:he-wrap|he-header(?:-cta|-phone)?|he-nav|he-brand|he-desktop-nav|he-mobile-menu|he-button|he-text-link|site-footer)(?:\b|\s|:|\[)/.test(selector);
  function extract(css){
   let result='',cursor=0;
   while(cursor<css.length){

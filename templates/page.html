@@ -32,7 +32,7 @@
         <a class="nav-optional" href="/#process">수업 방식</a>
         <a class="nav-optional" href="/#faq">자주 묻는 질문</a>
         <a class="nav-cta" href="/#consultation">상담 신청</a>
-        <a class="nav-phone" href="tel:01025686630" aria-label="전화상담 010-2568-6630"><span aria-hidden="true">📞</span><span>전화상담</span></a>
+        <a class="nav-phone" href="{{PHONE_HREF}}" aria-label="전화상담 {{PHONE_NUMBER}}"><span aria-hidden="true">📞</span><span>전화상담</span></a>
         <a class="nav-kakao" href="https://open.kakao.com/o/strVhSJi" target="_blank" rel="noopener noreferrer" aria-label="카카오톡 상담 새 창에서 열기"><span aria-hidden="true">💬</span><span>카카오톡 상담</span></a>
       </nav>
     </div>
@@ -44,14 +44,14 @@
     <div class="container footer-simple">
       <a class="footer-logo" href="/">{{BRAND_LOGO_FULL}}<span>{{BRAND_NAME}}</span></a>
       <p class="footer-services">초등 · 중등 · 고등 영어·수학</p>
-      <a class="footer-main-phone" href="tel:01025686630" aria-label="상담문의 010-2568-6630"><span>📞 상담문의</span><strong>010-2568-6630</strong></a>
+      <a class="footer-main-phone" href="{{PHONE_HREF}}" aria-label="상담문의 {{PHONE_NUMBER}}"><span>📞 상담문의</span><strong>{{PHONE_NUMBER}}</strong></a>
       <a class="footer-kakao" href="https://open.kakao.com/o/strVhSJi" target="_blank" rel="noopener noreferrer"><span aria-hidden="true">💬</span> 카카오톡 오픈채팅</a>
       <p>전국 1:1 맞춤 수업</p>
       <p class="footer-copyright">© {{COPYRIGHT_YEAR}} {{BRAND_ENGLISH_NAME}}</p>
       <nav class="footer-legal" aria-label="법적 안내"><a id="privacy-policy" href="/#privacy-policy">개인정보처리방침</a><a id="terms" href="/#terms">이용약관</a></nav>
     </div>
   </footer>
-  <nav class="mobile-contact-bar" aria-label="빠른 상담 메뉴"><a class="mobile-quick-contact mobile-phone" href="tel:01025686630" aria-label="전화 상담"><span aria-hidden="true">📞</span><span>전화</span></a><a class="mobile-quick-contact mobile-kakao" href="https://open.kakao.com/o/strVhSJi" target="_blank" rel="noopener noreferrer" aria-label="카카오톡 상담 새 창에서 열기"><span aria-hidden="true">💬</span><span>카카오톡</span></a><a class="mobile-consult" href="{{MOBILE_CONTACT_URL}}" aria-label="상담 신청하기">상담 신청</a></nav>
+  <nav class="mobile-contact-bar" aria-label="빠른 상담 메뉴"><a class="mobile-quick-contact mobile-phone" href="{{PHONE_HREF}}" aria-label="전화 상담 {{PHONE_NUMBER}}">전화 상담</a><a class="mobile-consult" href="{{MOBILE_CONTACT_URL}}" aria-label="상담 신청하기">상담 신청</a></nav>
   <script src="/utils/consultation-form.js" defer></script>
   <script src="/utils/lesson-region-modal.js" defer></script>
 
