@@ -44,9 +44,10 @@ const DESCRIPTION_PATTERNS = Object.freeze([
 const ALLOWED_TEMPLATES = Object.freeze([
   'elementary_english', 'middle_english', 'high_english',
   'elementary_math', 'middle_math', 'high_math',
+  'elementary_korean', 'middle_korean', 'high_korean',
 ]);
 const TUTORING_TARGETS = Object.freeze({ '초등학생': 'elementary', '중학생': 'middle', '고등학생': 'high' });
-const TUTORING_SUBJECTS = Object.freeze({ '영어': 'english', '수학': 'math' });
+const TUTORING_SUBJECTS = Object.freeze({ '영어': 'english', '수학': 'math', '국어': 'korean' });
 const TUTORING_PATTERN = '{지역} {대상} {세부키워드}{접미어}';
 const ALLOWED_TONES = Object.freeze(['친근형', '신뢰형', '전문형', '목표달성형', '차분형', '코칭형']);
 /* 수업 방식 정책: region은 기존 5개 컬럼을 사용하며 가능 여부를 저장하지 않습니다.
@@ -81,6 +82,7 @@ function generateFinalKeywords() {
     rewriteFinal_(finalSheet, result);
     SpreadsheetApp.flush();
     const message = '최종키워드 ' + result.length.toLocaleString() + '개를 생성했습니다. ' +
+      '활성 지역 ' + source.regions.length + '개 × 지역별 ' + ALLOWED_TEMPLATES.length + '개 조합. ' +
       'description 중복 ' + report.descriptionDuplicates.toLocaleString() +
       '개 (' + report.descriptionDuplicateRate + '%)';
     spreadsheet.toast(message, 'SEO 도구', 8);
@@ -151,7 +153,7 @@ function readSource_(spreadsheet) {
   validateSource_(regions, targets, details, rules);
   return { regions: regions, targets: targets, details: details, rules: rules };
 }
-/** 모든 대표 규칙을 조합하고 충돌과 지역별 6개 조합을 검사합니다. */
+/** 모든 대표 규칙을 조합하고 충돌과 지역별 지원 조합을 검사합니다. */
 function buildRows_(source) {
   const output = [];
   const keywordKeys = new Map();
@@ -173,6 +175,8 @@ function buildRows_(source) {
     });
   });
   validateRegionCombinations_(source.regions, output);
+  const expectedCount = source.regions.length * ALLOWED_TEMPLATES.length;
+  if (output.length !== expectedCount) throw new Error('final 생성 수 오류: 예상=' + expectedCount + ', 실제=' + output.length);
   return output;
 }
 /** 키워드와 slug가 모두 처음 나온 값일 때 final 행을 추가합니다. */
@@ -256,13 +260,21 @@ function stableHash_(value) {
 
 /** final 필수 콘텐츠가 모두 채워졌는지와 description 중복률을 확인합니다. */
 function inspectFinalRows_(rows) {
-  const requiredIndexes = [12, 13, 14, 15, 16, 17, 18];
+  const requiredIndexes = [0, 2, 7, 8, 9, 12, 13, 14, 15, 16, 17, 18];
+  const uniqueColumns = [0, 2, 9];
+  const seen = uniqueColumns.map(function () { return new Map(); });
   rows.forEach(function (row, index) {
     requiredIndexes.forEach(function (columnIndex) {
       if (!clean_(row[columnIndex])) {
         throw new Error('final 생성 결과 ' + (index + 2) + '행의 ' +
           APP.HEADERS.FINAL[columnIndex] + ' 값이 비어 있습니다.');
       }
+    });
+    uniqueColumns.forEach(function (columnIndex, uniqueIndex) {
+      const key = clean_(row[columnIndex]).toLocaleLowerCase();
+      const previous = seen[uniqueIndex].get(key);
+      if (previous !== undefined) throw new Error('final 중복 ' + APP.HEADERS.FINAL[columnIndex] + ' "' + key + '": ' + previous + '행과 ' + (index + 2) + '행, region=' + row[5] + ' ' + row[6] + ', target=' + row[8] + ', detail=' + row[7]);
+      seen[uniqueIndex].set(key, index + 2);
     });
     if (row[11].length < 80 || row[11].length > 150) {
       throw new Error('final 생성 결과 ' + (index + 2) + '행 description 길이가 80~150자가 아닙니다.');
@@ -285,7 +297,7 @@ function validateDetailContent_(detail) {
   const subjectSlug = TUTORING_SUBJECTS[detail.name];
   const label = 'details 시트 ' + detail.rowNumber + '행';
   if (!Object.prototype.hasOwnProperty.call(TUTORING_SUBJECTS, detail.name)) {
-    throw new Error(label + ': 활성 세부키워드는 영어 / 수학만 허용합니다. 현재: ' + detail.name);
+    throw new Error(label + ': 활성 세부키워드는 영어 / 수학 / 국어만 허용합니다. 현재: ' + detail.name);
   }
   if (!Object.prototype.hasOwnProperty.call(TUTORING_TARGETS, detail.restriction)) {
     throw new Error(label + ': 대상제한은 초등학생 / 중학생 / 고등학생 중 정확한 대상명 하나여야 합니다. 현재: ' + detail.restriction);
@@ -457,7 +469,13 @@ function validateSource_(regions, targets, details, rules) {
     if (combinations.has(key)) throw new Error('details 중복 조합 ' + key + ': ' + combinations.get(key) + '행과 ' + detail.rowNumber + '행');
     combinations.set(key, detail.rowNumber);
   });
-  if (combinations.size !== 6) throw new Error('details 시트에는 초등/중등/고등 × 영어/수학 6개 조합이 각각 1개씩 활성화되어야 합니다.');
+  const missing = [];
+  Object.keys(TUTORING_TARGETS).forEach(function (target) {
+    Object.keys(TUTORING_SUBJECTS).forEach(function (subject) {
+      if (!combinations.has(target + '|' + subject)) missing.push(target + ' × ' + subject);
+    });
+  });
+  if (combinations.size !== ALLOWED_TEMPLATES.length || missing.length) throw new Error('details 시트에는 ' + ALLOWED_TEMPLATES.length + '개 조합이 각각 1개씩 활성화되어야 합니다. 누락=' + missing.join(', '));
 }
 
 /** final을 지우기 전에 실제 출력의 지역별 조합과 템플릿을 재검사합니다. */
@@ -480,7 +498,7 @@ function validateRegionCombinations_(regions, rows) {
   });
   groups.forEach(function (group, region) {
     const missing = ALLOWED_TEMPLATES.filter(function (template) { return !group.has(template); });
-    if (group.size !== 6 || missing.length) throw new Error('지역별 6개 조합 오류: ' + region + ', 생성=' + group.size + ', 누락=' + missing.join(', '));
+    if (group.size !== ALLOWED_TEMPLATES.length || missing.length) throw new Error('지역별 ' + ALLOWED_TEMPLATES.length + '개 조합 오류: ' + region + ', 생성=' + group.size + ', 누락=' + missing.join(', '));
   });
 }
 /** final 내용을 모두 비운 뒤 기존 19개 열 순서로 새 결과를 기록합니다. */

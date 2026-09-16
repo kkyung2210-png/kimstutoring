@@ -32,6 +32,9 @@ function presentFields(page, fields) {
   const type = classifyTopic(page);
   // Audience sentences are independently authored; the original intent still seeds selection and is validated by the loader.
   const audiences = {
+    elementary_korean:'어휘와 문장 이해를 바탕으로 읽고 표현하는 힘을 기르려는 학생',
+    middle_korean:'문학과 비문학, 문법을 정리하며 내신을 준비하려는 학생',
+    high_korean:'문학과 독서의 판단 기준을 세우며 내신과 수능을 준비하려는 학생',
     elementary_english:'기초 어휘와 짧은 문장 읽기를 익히며 꾸준히 복습하려는 학생',
     middle_english:'문법과 독해를 보완하면서 내신·서술형·수행평가를 함께 준비하려는 학생',
     high_english:'구문독해와 지문 분석을 보완하며 내신과 모의고사·수능을 준비하려는 학생',

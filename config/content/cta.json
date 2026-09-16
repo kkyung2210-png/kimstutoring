@@ -137,6 +137,102 @@
         "text": "개념·유형별 문제풀이·내신·모의고사·수능·취약단원·오답분석 중 도움이 필요한 부분을 상담에서 말씀해 주세요. {{availability}}",
         "label": "수업 방식과 일정 문의"
       }
+    ],
+    "elementary_korean": [
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits"
+        ],
+        "title": "국어 공부의 시작점이 고민이라면",
+        "text": "현재 국어 교재와 어려운 내용을 알려주세요. 학생의 수준과 목표를 살피고, 지역·일정·강사 배정에 따른 방문 또는 화상수업 방식을 상담합니다.",
+        "label": "무료 상담 신청"
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits"
+        ],
+        "title": "읽고도 이해하기 어려운 부분이 있나요?",
+        "text": "현재 국어 교재와 어려운 내용을 알려주세요. 학생의 수준과 목표를 살피고, 지역·일정·강사 배정에 따른 방문 또는 화상수업 방식을 상담합니다.",
+        "label": "무료 상담 신청"
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits"
+        ],
+        "title": "학생에게 필요한 국어 학습을 상담합니다",
+        "text": "현재 국어 교재와 어려운 내용을 알려주세요. 학생의 수준과 목표를 살피고, 지역·일정·강사 배정에 따른 방문 또는 화상수업 방식을 상담합니다.",
+        "label": "무료 상담 신청"
+      }
+    ],
+    "middle_korean": [
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment"
+        ],
+        "title": "국어 공부의 시작점이 고민이라면",
+        "text": "현재 국어 교재와 어려운 내용을 알려주세요. 학생의 수준과 목표를 살피고, 지역·일정·강사 배정에 따른 방문 또는 화상수업 방식을 상담합니다.",
+        "label": "무료 상담 신청"
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment"
+        ],
+        "title": "읽고도 이해하기 어려운 부분이 있나요?",
+        "text": "현재 국어 교재와 어려운 내용을 알려주세요. 학생의 수준과 목표를 살피고, 지역·일정·강사 배정에 따른 방문 또는 화상수업 방식을 상담합니다.",
+        "label": "무료 상담 신청"
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment"
+        ],
+        "title": "학생에게 필요한 국어 학습을 상담합니다",
+        "text": "현재 국어 교재와 어려운 내용을 알려주세요. 학생의 수준과 목표를 살피고, 지역·일정·강사 배정에 따른 방문 또는 화상수업 방식을 상담합니다.",
+        "label": "무료 상담 신청"
+      }
+    ],
+    "high_korean": [
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment",
+          "college_exam"
+        ],
+        "title": "국어 공부의 시작점이 고민이라면",
+        "text": "현재 국어 교재와 어려운 내용을 알려주세요. 학생의 수준과 목표를 살피고, 지역·일정·강사 배정에 따른 방문 또는 화상수업 방식을 상담합니다.",
+        "label": "무료 상담 신청"
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment",
+          "college_exam"
+        ],
+        "title": "읽고도 이해하기 어려운 부분이 있나요?",
+        "text": "현재 국어 교재와 어려운 내용을 알려주세요. 학생의 수준과 목표를 살피고, 지역·일정·강사 배정에 따른 방문 또는 화상수업 방식을 상담합니다.",
+        "label": "무료 상담 신청"
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment",
+          "college_exam"
+        ],
+        "title": "학생에게 필요한 국어 학습을 상담합니다",
+        "text": "현재 국어 교재와 어려운 내용을 알려주세요. 학생의 수준과 목표를 살피고, 지역·일정·강사 배정에 따른 방문 또는 화상수업 방식을 상담합니다.",
+        "label": "무료 상담 신청"
+      }
     ]
   }
 }

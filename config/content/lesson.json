@@ -113,6 +113,84 @@
         ],
         "text": "{{target_short}} {{subject}}의 학습 순서는 학생의 설명과 풀이를 보며 조절합니다. 수강 과목과 시험 범위를 확인하고 취약단원의 개념을 연결한 뒤 유형별 접근, 모의고사 풀이 전략, 오답 원인을 분석합니다."
       }
+    ],
+    "elementary_korean": [
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits"
+        ],
+        "text": "짧은 글에서 모르는 어휘를 찾고 앞뒤 문장으로 뜻을 설명합니다."
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits"
+        ],
+        "text": "문장을 짧게 나누어 읽고 자기 말로 뜻을 이야기합니다."
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits"
+        ],
+        "text": "문단마다 중요한 내용을 표시하고 한두 문장으로 정리합니다."
+      }
+    ],
+    "middle_korean": [
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment"
+        ],
+        "text": "작품의 표현을 표시하고 인물의 태도를 뒷받침하는 근거를 찾습니다."
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment"
+        ],
+        "text": "문단별 핵심을 정리하고 앞뒤 내용의 관계를 설명합니다."
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment"
+        ],
+        "text": "문법 개념을 예문과 함께 정리하고 다른 문장에서 적용해 봅니다."
+      }
+    ],
+    "high_korean": [
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment",
+          "college_exam"
+        ],
+        "text": "독서 지문의 구조를 정리하고 필요한 정보를 문제와 연결합니다."
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment",
+          "college_exam"
+        ],
+        "text": "문학 작품의 화자와 상황을 정리하고 선택지의 근거를 비교합니다."
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment",
+          "college_exam"
+        ],
+        "text": "화법과 언어의 개념을 사례로 확인하고 작문의 조건을 표시하며 풉니다."
+      }
     ]
   }
 }

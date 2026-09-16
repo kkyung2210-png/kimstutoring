@@ -14,7 +14,7 @@ function generateHomePage({ root, outputPath, data, hubIndex }) {
   const targets = ['초등학생', '중학생', '고등학생'].map(value => hubIndex.target.find(h => h.value === value)).filter(Boolean);
   const activeSubjects = new Set(data.pages.map(p => p.subject));
   const subjectHubs = hubIndex.subject.filter(h => activeSubjects.has(h.value)).sort((a, b) => {
-    const order = ['영어', '수학'];
+    const order = ['영어', '수학', '국어'];
     const rank = value => order.includes(value) ? order.indexOf(value) : order.length;
     return rank(a.value) - rank(b.value) || a.value.localeCompare(b.value, 'ko');
   });
@@ -29,6 +29,7 @@ function generateHomePage({ root, outputPath, data, hubIndex }) {
   // Optional presentation metadata; additional active subjects have a generic layout fallback.
   const subjectDesign = {
     영어: { label: 'ENGLISH', image: '/images/english-tutoring.webp', alt: '영어 독해와 학습을 진행하는 1:1 영어과외', copy: '단어 하나에서,\n지문을 읽는 힘까지.', position: 'he-photo-right' },
+    국어: { label: 'KOREAN', fullImage: true, image: '/images/korean-tutoring.webp', alt: '국어 글 읽기와 표현을 연습하는 1:1 맞춤수업', copy: '읽는 것에서,\n이해하고 표현하는 힘으로.', position: 'he-photo-right' },
     수학: { label: 'MATHEMATICS', image: '/images/math-tutoring.webp', alt: '수학 문제풀이와 오답학습을 진행하는 수학과외', copy: '답을 찾는 것에서,\n풀이를 이해하는 것으로.', position: '' },
   };
   const subjects = subjectHubs.map((h, i) => {
@@ -36,7 +37,7 @@ function generateHomePage({ root, outputPath, data, hubIndex }) {
     const detail = subjectContent[h.value];
     const lessons = detail ? '<ol class="he-subject-lessons">' + detail.lessons.map(([title, text], n) => `<li><span class="he-subject-number">0${n + 1}</span><div><h4>${e(title)}</h4><p>${e(text)}</p></div></li>`).join('') + '</ol>' : '';
     const stages = detail ? '<dl class="he-subject-stages" aria-label="학년별 수업 중심">' + detail.stages.map(([target, text]) => `<div><dt>${e(target)}</dt><dd>${e(text)}</dd></div>`).join('') + '</dl>' : '';
-    return `<article class="he-subject-row${i % 2 ? ' he-subject-reverse' : ''}"><div class="he-subject-copy he-subject-heading"><p class="he-label">${s.label}</p><h3>${e(h.value)}</h3><p class="he-subject-statement">${e(s.copy).replace('\n', '<br>')}</p></div><div class="he-subject-photo">${photo(s.image, s.alt || '교재를 살펴보며 함께 공부하는 모습', s.position)}</div><div class="he-subject-copy he-subject-detail"><p>${e(detail?.description || subjectDescription(h.value))}</p>${lessons}${stages}<a class="he-text-link" href="${e(h.url)}">${e(h.value)}과외 보기 ${arrow}</a></div></article>`;
+    return `<article class="he-subject-row${i % 2 ? ' he-subject-reverse' : ''}"><div class="he-subject-copy he-subject-heading"><p class="he-label">${s.label}</p><h3>${e(h.value)}</h3><p class="he-subject-statement">${e(s.copy).replace('\n', '<br>')}</p></div><div class="he-subject-photo${s.fullImage ? ' he-subject-photo-full' : ''}">${fs.existsSync(path.join(root,'public',s.image)) ? photo(s.image, s.alt || '교재를 살펴보며 함께 공부하는 모습', s.position) : '<div class="he-subject-placeholder" role="img" aria-label="국어 수업 이미지 준비 중"><p>읽고, 이해하고,<br>자신의 말로 표현합니다.</p></div>'}</div><div class="he-subject-copy he-subject-detail"><p>${e(detail?.description || subjectDescription(h.value))}</p>${lessons}${stages}<a class="he-text-link" href="${e(h.url)}">${e(h.value)}과외 보기 ${arrow}</a></div></article>`;
   }).join('');
   const availablePairs = new Set(data.pages.map(p => p.target + '|' + p.subject));
   const shortTarget = { 초등학생: '초등', 중학생: '중등', 고등학생: '고등' };

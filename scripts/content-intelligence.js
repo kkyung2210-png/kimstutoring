@@ -1,10 +1,11 @@
 ﻿const fs = require('fs');
 const path = require('path');
 const PROFILES = require('../config/content/profiles.json');
-const TYPES = ['elementary_english','middle_english','high_english','elementary_math','middle_math','high_math'];
-const CONTRACT = Object.fromEntries(TYPES.map(type => { const [level,subject] = type.split('_'); return [type,{target:({elementary:'초등학생',middle:'중학생',high:'고등학생'})[level],subject:subject==='english'?'영어':'수학'}]; }));
+const TYPES = ['elementary_english','middle_english','high_english','elementary_math','middle_math','high_math','elementary_korean','middle_korean','high_korean'];
+const CONTRACT = Object.fromEntries(TYPES.map(type => { const [level,subject] = type.split('_'); return [type,{target:({elementary:'초등학생',middle:'중학생',high:'고등학생'})[level],subject:({english:'영어',math:'수학',korean:'국어'})[subject]}]; }));
 // Tags describe pedagogy, not URLs. Text detectors catch mislabeled CSV/config content as a second layer.
 const TOPICS = {
+ korean_literacy: /국어|문해력|문학|비문학|화법|작문/,
  english_basics: /영어|어휘|문법|문장 이해|단어|주어(?:와|를|의|\s)|동사/,
  english_reading: /구문독해|구문 해석|구문을|지문|독해/,
  math_arithmetic: /연산|자리값|검산/,
@@ -15,6 +16,9 @@ const TOPICS = {
  legacy_service: /일본어|토익|오픽|아이엘츠|토플|텝스|지텔프|\b(?:TOEIC|OPIC|IELTS|TOEFL|TEPS|JLPT|JPT|EJU)\b|(?:비즈니스|여행)\s*영어|영어회화|영어\s+회화\s*(?:과외|전문|상담|수업\s*신청)/i,
 };
 const ALLOWED = {
+ elementary_korean:['korean_literacy','study_habits'],
+ middle_korean:['korean_literacy','study_habits','school_assessment'],
+ high_korean:['korean_literacy','study_habits','school_assessment','college_exam'],
  elementary_english:['english_basics','study_habits'],
  middle_english:['english_basics','english_reading','school_assessment','study_habits'],
  high_english:['english_basics','english_reading','school_assessment','college_exam','study_habits'],
@@ -31,8 +35,9 @@ function classifyTopic(page) {
 }
 function validateText(type,value,label='content') {
  if(!ALLOWED[type]) throw Error(`알 수 없는 template: ${type}`);
+ if(type.endsWith('_korean') && /영어|영단어|영문법|구문독해|수학|연산|수식 계산|계산 실수|방정식 풀이/.test(String(value))) throw Error(`${label}: 국어에 다른 과목 혼입`);
  const text=String(value || '').replace(/{{[a-z_]+}}/g,'');
- for(const [topic,pattern] of Object.entries(TOPICS)) if(pattern.test(text) && !ALLOWED[type].includes(topic)) throw Error(`${label}: ${type}에 허용되지 않은 토픽 ${topic}`);
+ for(const [topic,pattern] of Object.entries(TOPICS)) if(!(type.endsWith('_korean') && ['english_basics','english_reading'].includes(topic)) && pattern.test(text) && !ALLOWED[type].includes(topic)) throw Error(`${label}: ${type}에 허용되지 않은 토픽 ${topic}`);
  for(const [level,pattern] of Object.entries({elementary:/초등(?:학생)?/,middle:/중학생|중등/,high:/고등(?:학생)?/})) if(!type.startsWith(level+'_') && pattern.test(text)) throw Error(`${label}: 다른 학교급 ${level} 혼입`);
  if(/전국 어디서나 온라인|온라인 전용|항상 방문 가능|(?:해당 지역|[가-힣]+은) 방문수업이 (?:가능|불가능)합니다/.test(text)) throw Error(`${label}: 수업 가능 여부 확정 표현`);
  if(/성적을 확실히|등급 상승을 보장|단기간에 점수가 향상/.test(text)) throw Error(`${label}: 학습 성과 보장 표현`);

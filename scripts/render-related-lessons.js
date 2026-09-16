@@ -1,5 +1,8 @@
 const {classifyTopic,validateText} = require('./content-intelligence');
 const CARD_COPY = Object.freeze({
+  elementary_korean:'어휘·문장 이해·기초 문해력',
+  middle_korean:'문학·비문학·문법·내신',
+  high_korean:'문학·독서·내신·모의고사·수능',
   elementary_english:'기초 어휘·문장 이해·읽기',
   middle_english:'문법·독해·학교별 내신',
   high_english:'구문독해·내신·모의고사·수능',

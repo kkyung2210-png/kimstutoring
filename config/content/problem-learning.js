@@ -215,4 +215,5 @@ for (const [type, profile] of Object.entries(profiles)) {
   {title:'학생에게 필요한 시작점을 함께 찾아봅니다',text:`${profile.target}의 현재 ${profile.subject} 학습 상황과 목표를 알려주세요. 혼자 할 수 있는 부분과 도움이 필요한 부분을 나누어 수업 방향을 상담합니다.`}
  ];
 }
+Object.assign(profiles, require('./korean-learning.json'));
 module.exports={profiles,commonFaqs};

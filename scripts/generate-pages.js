@@ -200,6 +200,8 @@ function humanizeSourcePhrase(value) {
 function makeContentContext(page) {
  const type=classifyTopic(page), profile=PROFILES[type];
  const fields={intent:page.searchIntent,concern:page.summary,focus:page.lessonFocus,method:page.lessonMethod,result:page.lessonResult};
+ // A transition goal is presentation context, not a high-school lesson for middle-school students.
+ if(type==='middle_korean') fields.result=fields.result.replace('고등 국어 학습에 필요한 기본기','다음 국어 학습에 필요한 기본기');
  for(const [name,text] of Object.entries(fields))validateText(type,text,page.slug+'/'+name);
  for(const [name,text] of Object.entries(page))if(/^(faq_|cta_|keyword$|title$)/.test(name))validateText(type,text,page.slug+'/'+name);
  return {province:page.province,city:page.region,region:[page.province,page.region].filter(Boolean).join(' '),target:page.target,target_short:profile.target_short,audience:page.target,service:page.subject+'과외',...presentFields(page,Object.fromEntries(Object.entries(fields).map(([k,v])=>[k,humanizeSourcePhrase(v)]))),tone:page.tone};

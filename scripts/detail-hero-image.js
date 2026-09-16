@@ -3,6 +3,7 @@ const {classifyTopic}=require('./content-intelligence');
 const {imageSize}=require('./utils/assets/resolve-asset');
 const {escape,imageTag}=require('./utils/assets/image-html');
 const IMAGES=Object.freeze({
+ elementary_korean:'elementary-korean', middle_korean:'middle-korean', high_korean:'high-korean',
  elementary_english:'elementary-english', elementary_math:'elementary-math',
  middle_english:'middle-english', middle_math:'middle-math',
  high_english:'high-english', high_math:'high-math'

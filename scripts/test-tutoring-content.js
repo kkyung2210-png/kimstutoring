@@ -29,11 +29,13 @@ function test({outputPath}={}) {
  }
  assert.throws(()=>validateText('high_math','등급 상승을 보장합니다.'),/보장 표현/);
  const raw=fixtureRows(), data=loadPages({csvText:csv(raw)}), again=loadPages({csvText:csv(raw)});
- assert.equal(data.pages.length,6);assert.deepStrictEqual(data.pages,again.pages);
+ assert.equal(data.pages.length,TYPES.length);assert.deepStrictEqual(data.pages,again.pages);
  const config=loadContentConfig();
  for(const kind of ['intro','lesson','benefit','faq','cta','examples'])for(const type of TYPES){const bad=structuredClone(config);delete bad[kind].templates[type];assert.throws(()=>validateConfig(bad),/콘텐츠 부족/);}
  for(const [type,text] of [['elementary_math','중학생 내신'],['elementary_math','수능'],['elementary_math','구문독해'],['middle_english','연산'],['middle_english','수능 수학'],['middle_english','JLPT']])assert.throws(()=>validateText(type,text),/토픽|학교급/);
  assert.doesNotThrow(()=>validateText('middle_english','영어 회화 표현을 문장 이해와 연결해 봅니다.'));
+ for(const type of TYPES.filter(t=>t.endsWith('_korean')))for(const text of ['영단어','영문법','구문독해','영어 독해','영어 어휘','연산','수식 계산','수학 공식','계산 실수','방정식 풀이'])assert.throws(()=>validateText(type,text),/혼입/);
+ for(const type of TYPES.filter(t=>!t.endsWith('_korean')))assert.throws(()=>validateText(type,'국어 문학과 작문'),/토픽/);
  const wrong=fixtureRows();wrong[0][8]='중학생';assert.throws(()=>loadPages({csvText:csv(wrong)}),/불일치/);
  const old=fixtureRows();old[0][18]='conversation';assert.throws(()=>loadPages({csvText:csv(old)}),/불일치/);
  const contaminated=fixtureRows();contaminated[3][14]='연산과 JLPT';assert.throws(()=>loadPages({csvText:csv(contaminated)}),/토픽/);
@@ -75,7 +77,7 @@ function test({outputPath}={}) {
  const sitemap=makeSitemap({pages:data.pages,baseUrl:data.baseUrl});data.pages.forEach(p=>assert(sitemap.includes('/'+p.slug+'/')));
  if(outputPath)fs.writeFileSync(path.join(outputPath,'seo-checks.json'),JSON.stringify(seoChecks,null,2)+'\n');
  if(outputPath)fs.writeFileSync(path.join(outputPath,'validation.json'),JSON.stringify({scope:'six detail samples only; home/hubs/full audit not built',pages:overview},null,2)+'\n');
- console.log('PASS: six templates; deterministic content; exact contracts; missing pools fail; topic contamination; CSV/HTML escaping; metadata; sections; FAQ/schema; CTA; sitemap.');
+ console.log('PASS: supported templates; deterministic content; exact contracts; missing pools fail; topic contamination; CSV/HTML escaping; metadata; sections; FAQ/schema; CTA; sitemap.');
  return data;
 }
 if(require.main===module)test({outputPath:path.resolve(__dirname,'../reports/tutoring-sample')});

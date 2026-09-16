@@ -113,6 +113,60 @@
         ],
         "text": "모의고사에서 틀린 문항을 접근 실패와 계산 오류로 나누고 취약단원 문제를 다시 풀어봅니다."
       }
+    ],
+    "elementary_korean": [
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits"
+        ],
+        "text": "짧은 글에서 모르는 어휘를 찾고 앞뒤 문장으로 뜻을 설명합니다."
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits"
+        ],
+        "text": "문장을 짧게 나누어 읽고 자기 말로 뜻을 이야기합니다."
+      }
+    ],
+    "middle_korean": [
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment"
+        ],
+        "text": "작품의 표현을 표시하고 인물의 태도를 뒷받침하는 근거를 찾습니다."
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment"
+        ],
+        "text": "문단별 핵심을 정리하고 앞뒤 내용의 관계를 설명합니다."
+      }
+    ],
+    "high_korean": [
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment",
+          "college_exam"
+        ],
+        "text": "독서 지문의 구조를 정리하고 필요한 정보를 문제와 연결합니다."
+      },
+      {
+        "topics": [
+          "korean_literacy",
+          "study_habits",
+          "school_assessment",
+          "college_exam"
+        ],
+        "text": "문학 작품의 화자와 상황을 정리하고 선택지의 근거를 비교합니다."
+      }
     ]
   }
 }
